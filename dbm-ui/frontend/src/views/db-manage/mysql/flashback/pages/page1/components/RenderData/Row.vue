@@ -17,7 +17,7 @@
       <RenderCluster
         ref="clusterRef"
         :model-value="data.clusterData"
-        @id-change="handleClusterIdChange" />
+        @cluster-change="handleClusterIdChange" />
     </FixedColumn>
     <td style="padding: 0">
       <RenderStartTime
@@ -102,7 +102,7 @@
   import RenderDbName from '@views/db-manage/mysql/common/edit-field/DbName.vue';
   import RenderTableName from '@views/db-manage/mysql/common/edit-field/TableName.vue';
 
-  import RenderCluster from './RenderCluster.vue';
+  import RenderCluster from '@views/db-manage/mysql/common/edit-field/ClusterNameWithSelector.vue';
   import RenderEndTime from './RenderEndTime.vue';
   import RenderStartTime from './RenderStartTime.vue';
 
@@ -147,8 +147,8 @@
       immediate: true,
     },
   );
-  const handleClusterIdChange = (id: number) => {
-    localClusterId.value = id;
+  const handleClusterIdChange = (info: { id: number }) => {
+    localClusterId.value = info.id;
   };
 
   const handleAppend = () => {

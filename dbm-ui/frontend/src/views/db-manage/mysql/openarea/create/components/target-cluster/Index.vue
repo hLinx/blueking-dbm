@@ -20,6 +20,7 @@
         :data="item"
         :removeable="tableData.length < 2"
         :show-ip-cloumn="showIpCloumn"
+        :clusterType="clusterType"
         :variable-list="variableList"
         @add="(payload: Array<IDataRow>) => handleAppend(index, payload)"
         @cluster-input-finish="(value) => handleInputCluster(index, value)"
@@ -50,10 +51,9 @@
 <script setup lang="ts">
   import _ from 'lodash';
   import { useI18n } from 'vue-i18n';
-
   import TendbhaModel from '@services/model/mysql/tendbha';
   import type { HostDetails } from '@services/types/ip';
-
+  import { queryClusters } from '@services/source/mysqlCluster';
   import { ClusterTypes, OSTypes } from '@common/const';
 
   import ClusterSelector from '@components/cluster-selector/Index.vue';
@@ -154,19 +154,30 @@
   };
 
   // 输入集群后查询集群信息并填充到table
-  const handleInputCluster = async (index: number, item: TendbhaModel) => {
-    const row = createRowData({
-      clusterData: {
-        id: item.id,
-        master_domain: item.master_domain,
-        bk_biz_id: item.bk_biz_id,
-        bk_cloud_id: item.bk_cloud_id,
-        bk_cloud_name: item.bk_cloud_name,
-      },
+  const handleInputCluster = async (index: number, id: number) => {
+    const result = await queryClusters({
+      cluster_filters: [
+        {
+          id,
+        },
+      ],
+      bk_biz_id: currentBizId,
     });
-    tableData.value[index] = row;
-    domainMemo[item.master_domain] = true;
-    selectedClusters.value[props.clusterType].push(item);
+    if (result.length > 0) {
+      const item = result[0];
+      const row = createRowData({
+        clusterData: {
+          id: item.id,
+          master_domain: item.master_domain,
+          bk_biz_id: item.bk_biz_id,
+          bk_cloud_id: item.bk_cloud_id,
+          bk_cloud_name: item.bk_cloud_name,
+        },
+      });
+      tableData.value[index] = row;
+      domainMemo[item.master_domain] = true;
+      selectedClusters.value[props.clusterType].push(item);
+    }
   };
 
   // 批量选择

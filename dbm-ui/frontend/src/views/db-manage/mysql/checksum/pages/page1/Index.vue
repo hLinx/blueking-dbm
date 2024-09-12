@@ -178,7 +178,7 @@
   const { t } = useI18n();
   const globalBizsStore = useGlobalBizs();
   const router = useRouter();
-  const formatDateToUTC = useTimeZoneFormat();
+  const { format: formatDateToUTC } = useTimeZoneFormat();
 
   // 单据克隆
   useTicketCloneInfo({
@@ -366,14 +366,14 @@
           bk_biz_id: globalBizsStore.currentBizId,
           details: {
             ...formdata,
-            timing: formatDateToUTC(format(new Date(formdata.timing), 'yyyy-MM-dd HH:mm:ss')),
+            timing: formatDateToUTC(formdata.timing.toISOString()),
             infos: data,
           },
         };
         return createTicket(params).then((data) => {
           window.changeConfirm = false;
           router.push({
-            name: 'spiderChecksum',
+            name: 'MySQLChecksum',
             params: {
               page: 'success',
             },

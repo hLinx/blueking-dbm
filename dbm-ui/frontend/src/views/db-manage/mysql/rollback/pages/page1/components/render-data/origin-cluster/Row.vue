@@ -17,7 +17,8 @@
       <RenderCluster
         ref="clusterRef"
         :model-value="localClusterData"
-        @change="handleClusterChange" />
+        tabs="both"
+        @cluster-change="handleClusterChange" />
     </FixedColumn>
     <td style="padding: 0">
       <RenderBackup
@@ -45,9 +46,9 @@
   import FixedColumn from '@components/render-table/columns/fixed-column/index.vue';
   import OperateColumn from '@components/render-table/columns/operate-column/index.vue';
 
+  import RenderCluster from '@views/db-manage/mysql/common/edit-field/ClusterNameWithSelector.vue';
   import RenderMode from '@views/db-manage/mysql/rollback/pages/page1/components/common/render-mode/Index.vue';
   import RenderBackup from '@views/db-manage/mysql/rollback/pages/page1/components/common/RenderBackup.vue';
-  import RenderCluster from '@views/db-manage/mysql/rollback/pages/page1/components/common/RenderCluster.vue';
 
   import { BackupSources } from '../../common/const';
   import { createRowData, type IDataRow } from '../Index.vue';

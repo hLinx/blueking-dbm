@@ -48,7 +48,7 @@
             :data="item"
             :removeable="tableData.length < 2"
             @add="(payload: Array<IDataRow>) => handleAppend(index, payload)"
-            @cluster-input-finish="(domainObj: TendbSingleModel | null) => handleChangeCluster(index, domainObj)"
+            @cluster-input-finish="(clusterId: number) => handleChangeCluster(index, clusterId)"
             @remove="handleRemove(index)" />
         </template>
       </RenderTable>
@@ -84,6 +84,7 @@
 
   import TendbSingleModel from '@services/model/mysql/tendbsingle';
   import { createTicket } from '@services/source/ticket';
+  import { getTendbsingleList } from '@services/source/tendbsingle';
 
   // import { useTicketCloneInfo } from '@hooks';
   import { useGlobalBizs } from '@stores';
@@ -190,8 +191,13 @@
   };
 
   // 输入集群后查询集群信息并填充到table
-  const handleChangeCluster = async (index: number, domainObj: TendbSingleModel | null) => {
-    if (domainObj) {
+  const handleChangeCluster = async (index: number, id: number) => {
+    tableData.value[index].isLoading = true;
+    const result = await getTendbsingleList({ id }).finally(() => {
+      tableData.value[index].isLoading = false;
+    });
+    if (result.results.length > 0) {
+      const domainObj = result.results[0];
       const row = generateTableRow(domainObj);
       tableData.value[index] = row;
       domainMemo[domainObj.master_domain] = true;

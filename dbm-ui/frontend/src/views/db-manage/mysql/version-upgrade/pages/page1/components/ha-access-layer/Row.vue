@@ -80,7 +80,7 @@
   interface Emits {
     (e: 'add', params: Array<IDataRow>): void;
     (e: 'remove'): void;
-    (e: 'clusterInputFinish', value: TendbhaModel | null): void;
+    (e: 'clusterInputFinish', clusterId: number): void;
   }
 
   interface Exposes {
@@ -106,8 +106,8 @@
     return undefined;
   });
 
-  const handleClusterIdChange = (value: TendbhaModel | null) => {
-    emits('clusterInputFinish', value);
+  const handleClusterIdChange = (clusterId: number) => {
+    emits('clusterInputFinish', clusterId);
   };
 
   const handleAppend = () => {

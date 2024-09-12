@@ -17,7 +17,7 @@
       <RenderCluster
         ref="clusterRef"
         :model-value="data.clusterData"
-        @input-cluster-finish="handleInputFinish" />
+        @cluster-change="handleInputFinish" />
     </FixedColumn>
     <td style="padding: 0">
       <RenderBackupLocal
@@ -55,7 +55,7 @@
 </script>
 <script setup lang="ts">
   import RenderBackupLocal from './RenderBackupLocal.vue';
-  import RenderCluster from './RenderCluster.vue';
+  import RenderCluster from '@views/db-manage/mysql/common/edit-field/ClusterNameWithSelector.vue';
 
   interface Props {
     data: IDataRow;
@@ -78,12 +78,13 @@
   const clusterRef = ref();
   const backupLocalRef = ref();
 
-  const handleInputFinish = (domain: string) => {
+  const handleInputFinish = (info: { id: number; domain: string }) => {
+    const { id, domain } = info;
     emits(
       'inputClusterFinish',
       createRowData({
         clusterData: {
-          id: 0,
+          id,
           domain,
         },
       }),

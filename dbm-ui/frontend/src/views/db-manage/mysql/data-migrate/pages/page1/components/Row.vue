@@ -17,7 +17,7 @@
       <RenderCluster
         ref="sourceClusterRef"
         :model-value="data.clusterData"
-        @id-change="handleClusterIdChange" />
+        @cluster-change="handleClusterIdChange" />
     </FixedColumn>
     <td style="padding: 0">
       <RenderClusterNameWithSelector
@@ -98,7 +98,7 @@
   });
 </script>
 <script setup lang="ts">
-  import RenderCluster from '@views/db-manage/mysql/common/edit-field/ClusterName.vue';
+  import RenderCluster from '@views/db-manage/mysql/common/edit-field/ClusterNameWithSelector.vue';
   import RenderDbName from '@views/db-manage/mysql/common/edit-field/DbName.vue';
 
   import RenderClusterNameWithSelector from './render-target-clusters/Index.vue';
@@ -155,8 +155,8 @@
     rowInfo.targetClusters = list.map((item) => item.id);
   };
 
-  const handleClusterIdChange = (clusterId: number) => {
-    emits('clusterInputFinish', clusterId);
+  const handleClusterIdChange = (info: { id: number }) => {
+    emits('clusterInputFinish', info.id);
   };
 
   const handleAppend = () => {

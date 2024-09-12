@@ -16,6 +16,7 @@
     <FixedColumn fixed="left">
       <RenderSlave
         ref="slaveRef"
+        :tab-list-config="tabListConfig"
         v-model="localSlave" />
     </FixedColumn>
     <td style="padding: 0">
@@ -30,13 +31,14 @@
   </tr>
 </template>
 <script lang="ts">
+  import { useI18n } from 'vue-i18n';
   import FixedColumn from '@components/render-table/columns/fixed-column/index.vue';
   import OperateColumn from '@components/render-table/columns/operate-column/index.vue';
-
+  import { ClusterTypes } from '@common/const';
   import { random } from '@utils';
 
   import RenderCluster from './RenderCluster.vue';
-  import RenderSlave from './RenderSlave.vue';
+  import RenderSlave from '@views/db-manage/mysql/common/edit-field/InstanceWithSelector.vue';
 
   export interface IDataRow {
     rowKey: string;
@@ -76,10 +78,26 @@
 
   const emits = defineEmits<Emits>();
 
+  const { t } = useI18n();
+
   const slaveRef = ref();
   const clusterRef = ref();
-
   const localSlave = ref<IDataRow['slave']>();
+
+  const tabListConfig = {
+    [ClusterTypes.TENDBHA]: [
+      {
+        name: t('目标从库实例'),
+        tableConfig: {
+          firsrColumn: {
+            label: 'slave',
+            role: 'slave',
+          },
+        },
+        multiple: false,
+      },
+    ],
+  };
 
   watch(
     () => props.data,

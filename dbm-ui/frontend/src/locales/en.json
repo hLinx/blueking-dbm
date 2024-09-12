@@ -352,7 +352,6 @@
   "新Proxy主机": "New Proxy host",
   "新主库IP": "New Master IP",
   "新从库IP": "New Slave IP",
-  "新从库主机": "New Slave host",
   "新实例": "New instance",
   "新客户端IP": "New client IP",
   "新节点IP": "New node IP",
@@ -1596,5 +1595,7 @@
   "规格名称不能为空": "Specification name cannot be empty",
   "主机资源不足_等待管理员users补货_补货完成后可以前往place重试": "Host resources are insufficient. Wait for the administrator ({users}) to replenish the inventory. After the replenishment is complete, you can go to \"{place}\" and try again",
   "可用主机数": "Number of available hosts",
-  "这行勿动！新增翻译请在上一行添加！": ""
+  "这行勿动！新增翻译请在上一行添加！": "",
+  "选择实例": "",
+  "格式不正确": ""
 }
