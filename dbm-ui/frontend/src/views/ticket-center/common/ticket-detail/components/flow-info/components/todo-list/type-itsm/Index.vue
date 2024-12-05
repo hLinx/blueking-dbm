@@ -12,6 +12,7 @@
   import StatusCommon from '../common';
 
   import StatusDoneFailed from './StatusDoneFailed.vue';
+  import StatusSuccess from './StatusSuccess.vue';
   import StatusTodo from './StatusTodo.vue';
 
   interface Props {
@@ -24,5 +25,6 @@
   const renderCom = Object.assign({}, StatusCommon, {
     [FlowMode.TODO_STATUS_TODO]: StatusTodo,
     [FlowMode.TODO_STATUS_DONE_FAILED]: StatusDoneFailed,
+    [FlowMode.TODO_STATUS_DONE_SUCCESS]: StatusSuccess,
   })[props.data.status];
 </script>

@@ -43,6 +43,11 @@
               :text="false"
               theme="" />
             <TicketRevoke :data="ticketData" />
+            <BkButton
+              v-if="isShowGoDetail"
+              @click="handleGoDetail">
+              {{ t('新窗口打开') }}
+            </BkButton>
           </template>
         </SmartAction>
       </PermissionCatch>
@@ -52,6 +57,7 @@
 <script setup lang="tsx">
   import { useI18n } from 'vue-i18n';
   import { useRequest } from 'vue-request';
+  import { useRoute, useRouter } from 'vue-router';
 
   import TicketModel from '@services/model/ticket/ticket';
   import { getTicketDetails } from '@services/source/ticket';
@@ -75,13 +81,16 @@
 
   const props = defineProps<Props>();
 
+  const router = useRouter();
+  const route = useRoute();
   const eventBus = useEventBus();
   const { t } = useI18n();
 
   const getOffsetTarget = () => document.body.querySelector('.ticket-details-page .db-card');
 
-  const isTaskInfoCardCollapse = useStorage('ticketTaskInfo', false);
+  const isShowGoDetail = route.name !== 'ticketDetail';
 
+  const isTaskInfoCardCollapse = useStorage('ticketTaskInfo', false);
   const isLoading = ref(true);
   const ticketData = shallowRef<TicketModel>();
 
@@ -126,6 +135,16 @@
       immediate: true,
     },
   );
+
+  const handleGoDetail = () => {
+    const { href } = router.resolve({
+      name: 'ticketDetail',
+      params: {
+        ticketId: props.ticketId,
+      },
+    });
+    window.open(href);
+  };
 
   eventBus.on('refreshTicketStatus', refreshTicketData);
 

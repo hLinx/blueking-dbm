@@ -151,7 +151,7 @@
 
   let isInit = true;
 
-  const { pause: pauseFetchData } = watch(
+  const { pause: pauseFetchData, resume: resumeFetchData } = watch(
     [formatDateValue, formatSearchValue],
     _.debounce(() => {
       if (!isInit) {
@@ -188,6 +188,7 @@
   };
 
   onActivated(() => {
+    resumeFetchData();
     currentTicketScrollToTop();
     eventBus.on('refreshTicketStatus', fetchData);
   });
