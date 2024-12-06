@@ -19,7 +19,9 @@
           :data="data.todos"
           :flow-data="data" />
         <span v-else>
-          <I18nT keypath="m_耗时_t">
+          <I18nT
+            keypath="m_耗时_t"
+            scope="global">
             <span style="color: #3a84ff">{{ t('执行中') }}</span>
             <CostTimer
               is-timing

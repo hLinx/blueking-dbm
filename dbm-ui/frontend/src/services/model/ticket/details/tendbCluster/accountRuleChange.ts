@@ -1,6 +1,8 @@
 import type { AccountRule, AccountRulePrivilege } from '@services/types/permission';
 
-export interface AccountRuleChange {
+import type { DetailBase } from '../common';
+
+export interface AccountRuleChange extends DetailBase {
   last_account_rules: AccountRule & {
     userName: string;
   };

@@ -3,7 +3,9 @@
     :data="data"
     :ticket-detail="ticketDetail">
     <template #content>
-      <I18nT keypath="n 已处理_c_耗时 t">
+      <I18nT
+        keypath="n 已处理_c_耗时 t"
+        scope="global">
         <span>{{ data.summary.operator }}</span>
         <span style="color: #ea3636">{{ t('已撤销') }}</span>
         <CostTimer
@@ -45,5 +47,7 @@
     name: FlowMode.STATUS_FAILED,
   });
 
-  const { t } = useI18n();
+  const { t } = useI18n({
+    useScope: 'global',
+  });
 </script>

@@ -213,12 +213,12 @@
         }
       });
 
-      // fix: menu 组件 acitve 生效有延迟的问题
-      setTimeout(() => {
-        document.body.querySelector('.bk-menu-item.is-active')?.scrollIntoView({
-          block: 'start',
-        });
-      }, 300);
+      // // fix: menu 组件 acitve 生效有延迟的问题
+      // setTimeout(() => {
+      //   document.body.querySelector('.bk-menu-item.is-active')?.scrollIntoView({
+      //     block: 'start',
+      //   });
+      // }, 300);
     },
     {
       immediate: true,

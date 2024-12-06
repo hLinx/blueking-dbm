@@ -19,11 +19,13 @@ const create = (dataSource: typeof getTickets, options?: { onSuccess?: (data: Ti
   const dataList = ref<TicketModel[]>([]);
   const pagination = reactive({
     offset: 0,
-    limit: 10,
+    limit: 20,
     current: 1,
     count: 0,
     limitList: [10, 20, 50, 100, 500],
+    remote: true,
   });
+  const ordering = ref('');
   const tableMaxHeight = ref<number | 'auto'>('auto');
 
   if (searchParams.limit && searchParams.current) {
@@ -64,6 +66,7 @@ const create = (dataSource: typeof getTickets, options?: { onSuccess?: (data: Ti
     dataSource({
       limit: pagination.limit,
       offset: (pagination.current - 1) * pagination.limit,
+      ordering: ordering.value,
       ...params,
     })
       .then((data) => {
@@ -74,6 +77,7 @@ const create = (dataSource: typeof getTickets, options?: { onSuccess?: (data: Ti
         const urlSearchParams = {
           limit: pagination.limit,
           current: pagination.current,
+          ordering: ordering.value,
           ...params,
         };
 
@@ -98,6 +102,7 @@ const create = (dataSource: typeof getTickets, options?: { onSuccess?: (data: Ti
     tableMaxHeight,
     dataList,
     pagination,
+    ordering,
     fetchTicketList,
   };
 };

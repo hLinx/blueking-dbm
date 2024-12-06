@@ -29,7 +29,7 @@
           <span>，</span>
           <I18nT
             keypath="含有n个高危语句"
-            tag="span">
+            scope="global">
             <span class="danger-count">
               {{ ticketDetail.details.grammar_check_info[fileName].highrisk_warnings.length }}
             </span>

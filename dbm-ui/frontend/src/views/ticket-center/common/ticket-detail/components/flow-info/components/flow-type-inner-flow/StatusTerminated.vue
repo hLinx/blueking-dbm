@@ -1,7 +1,9 @@
 <template>
   <StatusTerminated :data="data">
     <template #content>
-      <I18nT keypath="m_耗时_t">
+      <I18nT
+        keypath="m_耗时_t"
+        scope="global">
         <span style="color: #ea3636">{{ t('任务终止') }}</span>
         <CostTimer
           :is-timing="false"

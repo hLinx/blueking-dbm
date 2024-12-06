@@ -12,11 +12,19 @@
 -->
 
 <template>
-  <ComFactory :data="data" />
-  <div class="ticket-details-item">
-    <span class="ticket-details-item-label">{{ t('备注') }}：</span>
-    <span class="ticket-details-item-value">{{ data.remark || '--' }}</span>
-  </div>
+  <DbCard
+    v-model:collapse="isTaskInfoCardCollapse"
+    mode="collapse"
+    :title="t('需求信息')">
+    <ComFactory
+      class="ticket-details-page"
+      :data="data" />
+    <InfoList>
+      <Item :label="t('备注：')">
+        {{ data.remark || '--' }}
+      </Item>
+    </InfoList>
+  </DbCard>
 </template>
 
 <script setup lang="ts">
@@ -24,8 +32,10 @@
 
   import TicketModel from '@services/model/ticket/ticket';
 
+  import { useStorage } from '@vueuse/core';
+
+  import InfoList, { Item } from './com-factory/components/info-list/Index.vue';
   import ComFactory from './com-factory/Index.vue';
-  // import ComFactory from '@views/tickets/common/components/demand-factory/Index.vue';
 
   interface Props {
     data: TicketModel<unknown>;
@@ -36,8 +46,9 @@
   defineOptions({
     name: 'TicketTaskInfo',
   });
-
   const { t } = useI18n();
+
+  const isTaskInfoCardCollapse = useStorage('ticketTaskInfo', false);
 </script>
 
 <style lang="less">

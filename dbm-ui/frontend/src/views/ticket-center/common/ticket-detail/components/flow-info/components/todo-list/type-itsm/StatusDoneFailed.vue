@@ -3,7 +3,9 @@
     <div
       v-if="data.context.remark"
       style="margin-top: 12px; line-height: 16px; color: #63656e">
-      <I18nT keypath="备注：c">
+      <I18nT
+        keypath="备注：c"
+        scope="global">
         <span>{{ data.context.remark }}</span>
       </I18nT>
     </div>

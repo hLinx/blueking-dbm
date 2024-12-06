@@ -13,7 +13,9 @@
           :data="data.todos"
           :flow-data="data" />
         <span v-else>
-          <I18nT keypath="m_耗时_t">
+          <I18nT
+            keypath="m_耗时_t"
+            scope="global">
             <span style="color: #2dcb56">{{ t('执行成功') }}</span>
             <CostTimer
               :is-timing="false"
@@ -32,7 +34,9 @@
         <div
           v-if="data.summary"
           style="margin-top: 12px; line-height: 16px; color: #63656e">
-          <I18nT keypath="备注：c">
+          <I18nT
+            keypath="备注：c"
+            scope="global">
             <span>{{ data.summary }}</span>
           </I18nT>
         </div>

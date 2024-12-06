@@ -1,7 +1,9 @@
 <template>
   <div>
     <div>
-      <I18nT keypath="n 已处理_c_耗时 t">
+      <I18nT
+        keypath="n 已处理_c_耗时 t"
+        scope="global">
         <span>{{ data.done_by }}</span>
         <span style="color: #2dcb56">{{ t('确认执行') }}</span>
         <CostTimer

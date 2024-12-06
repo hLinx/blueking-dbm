@@ -31,8 +31,8 @@
         <span>
           <I18nT
             keypath="(开区模板：t，源集群：c，共克隆 n 个 DB)"
-            style="font-size: 12px; color: #63656e"
-            tag="span">
+            scope="global"
+            style="font-size: 12px; color: #63656e">
             <BkButton
               class="template-name"
               text
@@ -57,8 +57,8 @@
         <span>
           <I18nT
             keypath="(开区模板：t，源集群：c，共克隆 n 个 DB)"
-            style="font-size: 12px; color: #63656e"
-            tag="span">
+            scope="global"
+            style="font-size: 12px; color: #63656e">
             <BkButton
               class="template-name"
               text

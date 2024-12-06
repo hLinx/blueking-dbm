@@ -1,7 +1,9 @@
 <template>
   <StatusTerminated :data="data">
     <template #content>
-      <I18nT keypath="n 已处理_c_耗时 t">
+      <I18nT
+        keypath="n 已处理_c_耗时 t"
+        scope="global">
         <span>{{ data.summary.operator }}</span>
         <span style="color: #ea3636">{{ statusText }}</span>
         <CostTimer

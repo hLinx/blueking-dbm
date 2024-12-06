@@ -3,7 +3,14 @@
     :is="renderCom"
     :data="data">
     <template
-      v-if="[TicketTypes.MYSQL_IMPORT_SQLFILE, TicketTypes.SQLSERVER_IMPORT_SQLFILE].includes(ticketDetail.ticket_type)"
+      v-if="
+        [
+          TicketTypes.MYSQL_IMPORT_SQLFILE,
+          TicketTypes.SQLSERVER_IMPORT_SQLFILE,
+          TicketTypes.TENDBCLUSTER_IMPORT_SQLFILE,
+          TicketTypes.TENDBCLUSTER_FORCE_IMPORT_SQLFILE,
+        ].includes(ticketDetail.ticket_type)
+      "
       #contentPreppend>
       <!-- prettier-ignore -->
       <SqlGrammarCheck :ticket-detail="(ticketDetail as MySQLImportSQLFileTicekt)" />

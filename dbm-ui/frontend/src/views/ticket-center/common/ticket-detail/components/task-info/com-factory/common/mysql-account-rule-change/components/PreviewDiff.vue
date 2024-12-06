@@ -44,7 +44,7 @@
         <I18nT
           class="privilege-table-title"
           keypath="权限变更前后对比：新增n个，删除m个"
-          tag="span">
+          scope="global">
           <span style="color: #2dcb56">{{ addCount }}</span>
           <span style="color: #ea3636">{{ deleteCount }}</span>
         </I18nT>

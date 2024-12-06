@@ -38,7 +38,7 @@
       style="flex: 1 0 100%">
       <BkTable
         :data="targetClusterData"
-        :pagination="pagination">
+        :pagination="targetClusterPagination.count > 10 ? targetClusterPagination : undefined">
         <BkTableColumn :label="t('集群')">
           <template #default="{ data }: { data: TargerCluster }">
             {{ ticketDetails.details.clusters[data.id].immute_domain }}
@@ -63,7 +63,7 @@
     </InfoItem>
     <InfoItem
       :label="t('目标DB:')"
-      style="flex: 1 0 100%">
+      style="flex: 1 0 100%; margin-top: 10px">
       <BkTable :data="ticketDetails.details.execute_objects">
         <BkTableColumn :label="t('变更的 DB')">
           <template #default="{ data }: { data: TargetDbRow }">
@@ -142,7 +142,11 @@
 
   const { t } = useI18n();
 
-  const pagination = { count: 11, limit: 10, current: 1 };
+  const targetClusterPagination = reactive({
+    count: props.ticketDetails.details.cluster_ids.length || 0,
+    limit: 10,
+    current: 1,
+  });
 
   const selectFileName = ref('');
   const currentExecuteObject = ref<Props['ticketDetails']['details']['execute_objects'][number]>();

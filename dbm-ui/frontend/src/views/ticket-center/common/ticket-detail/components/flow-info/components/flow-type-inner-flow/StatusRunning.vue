@@ -2,7 +2,9 @@
   <StatusRunning :data="data">
     <template #content>
       <span>
-        <I18nT keypath="m_耗时_t">
+        <I18nT
+          keypath="m_耗时_t"
+          scope="global">
           <span
             v-if="isTicketStatusInnerTodo"
             style="color: #e38b02">

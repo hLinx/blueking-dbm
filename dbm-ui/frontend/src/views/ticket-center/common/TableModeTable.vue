@@ -7,16 +7,19 @@
         :data="dataList"
         :max-height="tableMaxHeight"
         :pagination="pagination"
-        remote-pagination
         :row-class="rowClass"
         :show-overflow="false"
+        @filter-change="handleFilterChange"
         @page-limit-change="handlePageLimitChange"
-        @page-value-change="handlePageValueChange">
+        @page-value-change="handlePageValueChange"
+        @sort-change="handleSortChange">
         <template
           v-if="Object.keys(rowSelectMemo).length > 0"
           #prepend>
           <div style="display: flex; justify-content: center; height: 30px; background: #ebecf0; align-items: center">
-            <I18nT keypath="已选n条，">
+            <I18nT
+              keypath="已选n条，"
+              scope="global">
               <span class="number">{{ Object.keys(rowSelectMemo).length }}</span>
             </I18nT>
             <BkButton
@@ -30,9 +33,44 @@
         <BkTableColumn
           v-if="selectable"
           fixed="left"
-          :label="renderSelectionColumnHead"
           :min-width="80"
           :width="80">
+          <template #header>
+            <div class="table-selection-head">
+              <div
+                v-if="isWholeChecked"
+                class="db-table-whole-check"
+                @click="handleClearWholeSelect" />
+              <BkCheckbox
+                v-else
+                label
+                :model-value="Object.keys(rowSelectMemo).length > 0"
+                @change="handleTogglePageSelect" />
+              <BkPopover
+                :arrow="false"
+                placement="bottom-start"
+                theme="light ticket-table-select-menu"
+                trigger="hover">
+                <DbIcon
+                  class="select-menu-flag"
+                  type="down-big" />
+                <template #content>
+                  <div class="select-menu">
+                    <div
+                      class="item"
+                      @clilck="handlePageSelect">
+                      {{ t('本页全选') }}
+                    </div>
+                    <div
+                      class="item"
+                      @clilck="handleWholeSelect">
+                      {{ t('跨页全选') }}
+                    </div>
+                  </div>
+                </template>
+              </BkPopover>
+            </div>
+          </template>
           <template #default="{ row }: { row: IRowData}">
             <BkCheckbox
               label
@@ -43,6 +81,8 @@
         <slot name="prepend" />
         <BkTableColumn
           field="bk_biz_id"
+          :filter-multiple="false"
+          :filters="searchFieldMap['bk_biz_id']"
           :label="t('业务')"
           :min-width="150">
           <template #default="{ data }: { data: IRowData }">
@@ -50,9 +90,15 @@
           </template>
         </BkTableColumn>
         <BkTableColumn
-          field="ticket_type_display"
+          field="ticket_type__in"
+          filter-multiple
+          :filters="searchFieldMap['ticket_type__in']"
           :label="t('单据类型')"
-          :min-width="200" />
+          :min-width="200">
+          <template #default="{ data }: { data: IRowData }">
+            {{ data.ticket_type_display }}
+          </template>
+        </BkTableColumn>
         <BkTableColumn
           field="ticket_type_display"
           :label="t('子任务')"
@@ -108,7 +154,9 @@
                   }"
                   class="ml-4"
                   size="small">
-                  <I18nT keypath="共n个">
+                  <I18nT
+                    keypath="共n个"
+                    scope="global">
                     {{ data.related_object.objects.length }}
                   </I18nT>
                 </BkTag>
@@ -118,7 +166,9 @@
           </template>
         </BkTableColumn>
         <BkTableColumn
-          field="status__in"
+          field="status"
+          filter-multiple
+          :filters="searchFieldMap['status']"
           :label="t('单据状态')"
           :min-width="100">
           <template #default="{ data }: { data: IRowData }">
@@ -136,9 +186,8 @@
           </template>
         </BkTableColumn>
         <BkTableColumn
-          field="createAtDisplay"
+          field="todo_operators"
           :label="t('当前处理人')"
-          sort
           width="250">
           <template #default="{ data }: { data: IRowData }">
             <BkTag
@@ -154,10 +203,14 @@
           :label="t('申请人')"
           width="250" />
         <BkTableColumn
-          field="createAtDisplay"
+          field="create_at"
           :label="t('申请时间')"
           sort
-          width="250" />
+          width="250">
+          <template #default="{ data }: { data: IRowData }">
+            {{ data.createAtDisplay || '--' }}
+          </template>
+        </BkTableColumn>
         <slot name="action" />
         <template #empty>
           <EmptyStatus
@@ -171,31 +224,33 @@
   </BkLoading>
 </template>
 <script setup lang="tsx">
-  import { onActivated, shallowRef, useTemplateRef } from 'vue'
-  import { useI18n } from 'vue-i18n'
-  import { useRequest } from 'vue-request'
+  import { onActivated, shallowRef, useTemplateRef } from 'vue';
+  import { useI18n } from 'vue-i18n';
+  import { useRequest } from 'vue-request';
 
   import TicketModel from '@services/model/ticket/ticket';
   import { getTickets } from '@services/source/ticket';
-  import {getInnerFlowInfo} from '@services/source/ticketFlow'
+  import { getInnerFlowInfo } from '@services/source/ticketFlow';
 
-  import { useEventBus, useStretchLayout  } from '@hooks';
+  import { useEventBus, useStretchLayout } from '@hooks';
 
   import EmptyStatus from '@components/empty-status/EmptyStatus.vue';
   import TicketStatusTag from '@components/ticket-status-tag/Index.vue';
 
-  import { getOffset } from '@utils'
+  import { getOffset } from '@utils';
+
+  import { type VxeTableDefines } from '@blueking/vxe-table';
 
   import useDatePicker from './hooks/use-date-picker';
   import useFetchData from './hooks/use-fetch-data';
   import useSearchSelect from './hooks/use-search-select';
 
-  type IRowData = TicketModel<unknown>
+  type IRowData = TicketModel<unknown>;
 
   interface Props {
     dataSource: typeof getTickets;
-    selectable?: boolean,
-    rowClass: (params: TicketModel) => string
+    selectable?: boolean;
+    rowClass: (params: TicketModel) => string;
   }
 
   interface Emits {
@@ -211,7 +266,7 @@
   defineSlots<{
     prepend?: () => VNode;
     action?: () => VNode;
-  }>()
+  }>();
 
   const { t } = useI18n();
   const eventBus = useEventBus();
@@ -220,16 +275,16 @@
   let isInited = false;
 
   const { value: datePickerValue, formatValue: formatDateValue } = useDatePicker();
-  const { loading: isLoading, pagination, fetchTicketList, dataList } = useFetchData(props.dataSource);
-  const { value: searchSelectValue, formatSearchValue } = useSearchSelect();
+  const { loading: isLoading, pagination, fetchTicketList, dataList, ordering } = useFetchData(props.dataSource);
+  const { value: searchSelectValue, formatSearchValue, searchFieldMap } = useSearchSelect();
 
-  const rootRef = useTemplateRef('tableWrapper')
+  const rootRef = useTemplateRef('tableWrapper');
   const tableMaxHeight = ref<number | 'auto'>('auto');
   const isWholeChecked = ref(false);
   const isCurrentPageAllSelected = ref(false);
-  const rowSelectMemo = ref<Record<number, TicketModel<unknown>>>({});
+  const rowSelectMemo = ref<Record<number, TicketModel>>({});
 
-  const ticketInnerFlowInfo = shallowRef<ServiceReturnType<typeof getInnerFlowInfo>>({})
+  const ticketInnerFlowInfo = shallowRef<ServiceReturnType<typeof getInnerFlowInfo>>({});
 
   const isSearching = computed(
     () =>
@@ -245,54 +300,18 @@
     });
   };
 
-  const renderSelectionColumnHead = () => {
-    const renderCheckbox = () => {
-      if (isWholeChecked.value) {
-      return (
-        <div class="db-table-whole-check" onClick={handleClearWholeSelect} />
-      );
-    }
-    return (
-      <bk-checkbox
-        label={true}
-        model-value={Object.keys(rowSelectMemo.value).length > 0}
-        onChange={handleTogglePageSelect} />
-    );
-    }
-    return (
-      <div class="table-selection-head">
-        {renderCheckbox()}
-        <bk-popover
-          placement="bottom-start"
-          theme="light ticket-table-select-menu"
-          arrow={ false }
-          trigger='hover'
-          v-slots={{
-            default: () => <db-icon class="select-menu-flag" type="down-big" />,
-            content: () => (
-              <div class="select-menu">
-                <div class="item" onClick={handlePageSelect}>{t('本页全选')}</div>
-                <div class="item" onClick={handleWholeSelect}>{t('跨页全选')}</div>
-              </div>
-            ),
-          }}>
-        </bk-popover>
-      </div>
-    )
-  }
-
-  const {run: fetchInnerFlowInfo} = useRequest(getInnerFlowInfo, {
+  const { run: fetchInnerFlowInfo } = useRequest(getInnerFlowInfo, {
     manual: true,
     onSuccess(data) {
-      ticketInnerFlowInfo.value = data
-    }
-  })
+      ticketInnerFlowInfo.value = data;
+    },
+  });
   const triggerSelection = () => {
     emits('selection', Object.values(rowSelectMemo.value));
-  }
+  };
 
   const { pause: pauseFetchData, resume: resumeFetchData } = watch([formatDateValue, formatSearchValue], () => {
-    if (!isInited){
+    if (!isInited) {
       isInited = true;
     } else {
       pagination.current = 1;
@@ -301,71 +320,103 @@
     fetchData();
   });
 
-  watch(() => [dataList, rowSelectMemo], () => {
-    isCurrentPageAllSelected.value = dataList.value.every((item) => rowSelectMemo.value[item.id]);
-  })
+  watch(
+    () => [dataList, rowSelectMemo],
+    () => {
+      isCurrentPageAllSelected.value = dataList.value.every((item) => rowSelectMemo.value[item.id]);
+    },
+  );
 
-  const {pause: pauseFetchInnerFlowInfo, resume: resumeFetchInnerFlowInfo } = watch(dataList, () => {
-    if (dataList.value.length < 1){
-      return
+  const { pause: pauseFetchInnerFlowInfo, resume: resumeFetchInnerFlowInfo } = watch(dataList, () => {
+    if (dataList.value.length < 1) {
+      return;
     }
     fetchInnerFlowInfo({
-      ticket_ids: dataList.value.map(item => item.id).join(',')
-    })
-  })
+      ticket_ids: dataList.value.map((item) => item.id).join(','),
+    });
+  });
 
   const handleSelectionChange = (data: IRowData) => {
-    const rowSelect = { ...rowSelectMemo.value }
-    if (rowSelectMemo.value[data.id]){
+    const rowSelect = { ...rowSelectMemo.value };
+    if (rowSelectMemo.value[data.id]) {
       delete rowSelect[data.id];
     } else {
       rowSelect[data.id] = data;
     }
     rowSelectMemo.value = rowSelect;
     triggerSelection();
-  }
+  };
 
   const handlePageSelect = () => {
-    const rowSelect = { ...rowSelectMemo.value }
+    const rowSelect = { ...rowSelectMemo.value };
     dataList.value.forEach((item) => {
       rowSelectMemo.value[item.id] = item;
-    })
+    });
     rowSelectMemo.value = rowSelect;
     triggerSelection();
-  }
+  };
 
   const handleTogglePageSelect = (checked: boolean) => {
-    const rowSelect = { ...rowSelectMemo.value }
+    const rowSelect = { ...rowSelectMemo.value };
     dataList.value.forEach((item) => {
-      if (checked){
+      if (checked) {
         rowSelect[item.id] = item;
       } else {
-        delete rowSelect[item.id]
+        delete rowSelect[item.id];
       }
-    })
+    });
     rowSelectMemo.value = rowSelect;
     triggerSelection();
-  }
+  };
 
   const handleWholeSelect = () => {
-    const rowSelect = { ...rowSelectMemo.value }
-    props.dataSource({
-      ...formatDateValue.value,
-      ...formatSearchValue.value,
-      limit: -1
-    }).then(result => {
-      result.results.forEach((item) => {
-        rowSelect[item.id] = item;
+    const rowSelect = { ...rowSelectMemo.value };
+    props
+      .dataSource({
+        ...formatDateValue.value,
+        ...formatSearchValue.value,
+        limit: -1,
       })
-      rowSelectMemo.value = rowSelect;
-      triggerSelection();
-    })
-  }
+      .then((result) => {
+        result.results.forEach((item) => {
+          rowSelect[item.id] = item;
+        });
+        rowSelectMemo.value = rowSelect;
+        triggerSelection();
+      });
+  };
 
   const handleClearWholeSelect = () => {
-    rowSelectMemo.value = {}
+    rowSelectMemo.value = {};
     triggerSelection();
-  }
+  };
+
+  const handleSortChange = (payload: { field: string; order: string }) => {
+    ordering.value = payload.order === 'desc' ? payload.field : `-${payload.field}`;
+    fetchData();
+  };
+
+  const handleFilterChange = (payload: VxeTableDefines.FilterChangeEventParams) => {
+    const result = payload.filterList.map((item) => {
+      const nameMap = item.column.filters.reduce<Record<string, string>>(
+        (result, item) =>
+          Object.assign(result, {
+            [item.value]: item.label,
+          }),
+        {},
+      );
+      return {
+        id: item.field,
+        name: item.column.title,
+        values: item.values.map((valueItem) => ({
+          id: valueItem,
+          name: nameMap[valueItem],
+        })),
+      };
+    });
+
+    searchSelectValue.value = result;
+  };
 
   // 切换每页条数
   const handlePageLimitChange = (pageLimit: number) => {
@@ -380,40 +431,40 @@
   };
 
   const handleClearSearch = () => {
-    searchSelectValue.value = []
-    datePickerValue.value = ['', '']
-  }
+    searchSelectValue.value = [];
+    datePickerValue.value = ['', ''];
+  };
 
   const fetchRefresh = () => {
-    rowSelectMemo.value = {}
+    rowSelectMemo.value = {};
     triggerSelection();
     fetchData();
-  }
+  };
 
   onActivated(() => {
     resumeFetchData();
     resumeFetchInnerFlowInfo();
     eventBus.on('refreshTicketStatus', fetchRefresh);
-  })
+  });
 
   onDeactivated(() => {
     pauseFetchData();
     pauseFetchInnerFlowInfo();
     eventBus.off('refreshTicketStatus', fetchRefresh);
-  })
+  });
 
   onMounted(() => {
-    tableMaxHeight.value = window.innerHeight - getOffset(rootRef.value as HTMLElement).top - 20
-  })
+    tableMaxHeight.value = window.innerHeight - getOffset(rootRef.value as HTMLElement).top - 20;
+  });
 
   defineExpose({
-    fetchData(){
-      fetchData()
+    fetchData() {
+      fetchData();
     },
-    resetSelection(){
-      rowSelectMemo.value = {}
+    resetSelection() {
+      rowSelectMemo.value = {};
       triggerSelection();
-    }
+    },
   });
 </script>
 <style lang="less">

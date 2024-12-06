@@ -3,7 +3,9 @@
     :data="data"
     :ticket-detail="ticketDetail">
     <template #content>
-      <I18nT keypath="m_处理人_p_耗时_t">
+      <I18nT
+        keypath="m_处理人_p_耗时_t"
+        scope="global">
         <span style="color: #ea3636">{{ t('执行失败') }}</span>
         <span>{{ ticketDetail.todo_operators.join(',') }}</span>
         <CostTimer

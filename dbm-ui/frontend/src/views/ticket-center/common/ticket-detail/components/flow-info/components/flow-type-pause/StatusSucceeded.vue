@@ -1,7 +1,9 @@
 <template>
   <StatusSucceeded :data="data">
     <template #title>
-      <I18nT keypath="确认是否执行 n">
+      <I18nT
+        keypath="确认是否执行 n"
+        scope="global">
         {{ data.flow_type_display }}
       </I18nT>
     </template>

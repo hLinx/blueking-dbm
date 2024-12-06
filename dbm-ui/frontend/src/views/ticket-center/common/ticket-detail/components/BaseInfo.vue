@@ -1,5 +1,6 @@
 <template>
   <DbCard
+    v-model:collapse="isBaseinfoCardCollapse"
     mode="collapse"
     :title="t('基本信息')">
     <table class="ticket-base-info">
@@ -43,25 +44,34 @@
 
   import { utcDisplayTime, utcTimeToSeconds } from '@utils';
 
+  import { useStorage } from '@vueuse/core';
+
   interface Props {
-    ticketData: TicketModel<unknown>;
+    ticketData: TicketModel;
   }
 
   defineProps<Props>();
 
   const { t } = useI18n();
+
+  const isBaseinfoCardCollapse = useStorage('ticketBaseinfo', false);
 </script>
 <style lang="less">
   .ticket-base-info {
+    table-layout: fixed;
+
     td {
-      width: 18%;
       line-height: 32px;
       color: #313238;
 
       &:nth-child(2n + 1) {
-        width: 12%;
+        width: 150px;
         padding-right: 8px;
         text-align: right;
+      }
+
+      &:first-child {
+        width: 100px;
       }
     }
   }

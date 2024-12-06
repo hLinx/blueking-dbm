@@ -1,7 +1,9 @@
 <template>
   <StatusSucceeded :data="data">
     <template #content>
-      <I18nT keypath="m_耗时_t">
+      <I18nT
+        keypath="m_耗时_t"
+        scope="global">
         <span style="color: #2dcb56">
           {{ t('执行成功') }}
           <span v-if="data.summary.status === 'FAILED'">({{ data.summary.message }})</span>

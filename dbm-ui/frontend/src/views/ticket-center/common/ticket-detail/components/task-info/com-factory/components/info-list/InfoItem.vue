@@ -14,6 +14,8 @@
   defineProps<Props>();
 </script>
 <style lang="less">
+  @label-width: 100px;
+
   .db-ticket-info-item {
     flex: 0 0 50%;
     display: flex;
@@ -23,18 +25,18 @@
   }
 
   .db-ticket-info-item-lable {
-    min-width: 100px;
-    padding-right: 4px;
+    width: @label-width;
+    padding-right: 8px;
     line-height: 32px;
     text-align: right;
   }
 
   .db-ticket-info-item-value {
+    width: calc(100% - @label-width);
     overflow: hidden;
     color: #313238;
     text-overflow: ellipsis;
     white-space: nowrap;
-    flex: 1;
 
     & > .bk-table {
       margin-top: 8px;

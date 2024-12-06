@@ -44,8 +44,9 @@ export function getTickets(params: {
   cluster?: string;
   todo?: string;
   self_manage?: number;
+  ordering?: string;
 }) {
-  return http.get<ListBase<TicketModel<unknown>[]>>(`${path}/`, params).then((data) => ({
+  return http.get<ListBase<TicketModel[]>>(`${path}/`, params).then((data) => ({
     ...data,
     results: data.results.map((item) => new TicketModel(item)),
   }));

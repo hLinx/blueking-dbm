@@ -19,21 +19,13 @@
       style="min-height: calc(100vh - 104px - var(--notice-height))">
       <PermissionCatch :key="ticketId">
         <SmartAction :offset-target="getOffsetTarget">
-          <template v-if="ticketData">
+          <div
+            v-if="ticketData"
+            class="pb-20">
             <BaseInfo :ticket-data="ticketData" />
-            <DbCard
-              v-model:collapse="isTaskInfoCardCollapse"
-              mode="collapse"
-              :title="t('需求信息')">
-              <TaskInfo :data="ticketData" />
-            </DbCard>
-            <DbCard
-              class="ticket-flows"
-              mode="collapse"
-              :title="t('实施进度')">
-              <FlowInfos :data="ticketData" />
-            </DbCard>
-          </template>
+            <TaskInfo :data="ticketData" />
+            <FlowInfos :data="ticketData" />
+          </div>
           <template
             v-if="ticketData"
             #action>
@@ -42,7 +34,9 @@
               :data="ticketData"
               :text="false"
               theme="" />
-            <TicketRevoke :data="ticketData" />
+            <TicketRevoke
+              class="mr-8"
+              :data="ticketData" />
             <BkButton
               v-if="isShowGoDetail"
               @click="handleGoDetail">
@@ -69,7 +63,7 @@
   import TicketClone from '@views/ticket-center/common/TicketClone.vue';
   import TicketRevoke from '@views/ticket-center/common/TicketRevoke.vue';
 
-  import { useStorage, useTimeoutFn } from '@vueuse/core';
+  import { useTimeoutFn } from '@vueuse/core';
 
   import BaseInfo from './components/BaseInfo.vue';
   import FlowInfos from './components/flow-info/Index.vue';
@@ -90,7 +84,6 @@
 
   const isShowGoDetail = route.name !== 'ticketDetail';
 
-  const isTaskInfoCardCollapse = useStorage('ticketTaskInfo', false);
   const isLoading = ref(true);
   const ticketData = shallowRef<TicketModel>();
 
@@ -161,38 +154,11 @@
 
     .db-card {
       .db-card__content {
-        padding-left: 82px;
+        padding-left: 116px;
       }
 
       & ~ .db-card {
         margin-top: 16px;
-      }
-    }
-
-    .ticket-flows {
-      margin-bottom: 20px;
-
-      .flow-todo__title {
-        padding-bottom: 12px;
-        font-weight: bold;
-      }
-    }
-
-    .ticket-flow-content {
-      .ticket-flow-content-desc {
-        padding: 8px 0 24px;
-        font-size: @font-size-mini;
-        color: @title-color;
-      }
-
-      .ticket-flow-content-buttons {
-        text-align: right;
-
-        .bk-button {
-          min-width: 62px;
-          margin-left: 8px;
-          font-size: @font-size-mini;
-        }
       }
     }
   }

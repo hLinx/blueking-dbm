@@ -1,7 +1,9 @@
 <template>
   <div>
     <div>
-      <I18nT keypath="n 已处理_c_耗时 t">
+      <I18nT
+        keypath="n 已处理_c_耗时 t"
+        scope="global">
         <span>{{ data.done_by }}</span>
         <span style="color: #ea3636">{{ t('人工终止') }}</span>
         <CostTimer
@@ -20,7 +22,9 @@
       <div
         v-if="data.context.remark"
         style="margin-top: 12px; line-height: 16px; color: #63656e">
-        <I18nT keypath="备注：c">
+        <I18nT
+          keypath="备注：c"
+          scope="global">
           <span>{{ data.context.remark }}</span>
         </I18nT>
       </div>

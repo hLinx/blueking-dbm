@@ -12,7 +12,9 @@
 -->
 
 <template>
-  <div class="ticket-detail-flow-info">
+  <DbCard
+    mode="collapse"
+    :title="t('实施进度')">
     <BkLoading :loading="isLoading">
       <DbTimeLine>
         <template
@@ -31,9 +33,10 @@
         </template>
       </DbTimeLine>
     </BkLoading>
-  </div>
+  </DbCard>
 </template>
 <script setup lang="ts">
+  import { useI18n } from 'vue-i18n';
   import { useRequest } from 'vue-request';
 
   import TicketModel from '@services/model/ticket/ticket';
@@ -51,6 +54,8 @@
   defineOptions({
     name: 'TicketFlowInfo',
   });
+
+  const { t } = useI18n();
 
   const flowTypeModule = Object.values(
     import.meta.glob<{
@@ -97,17 +102,4 @@
       immediate: true,
     },
   );
-
-  // const handleFecthData = () => {
-  //   fetchTicketFlows({
-  //     id: props.data.id,
-  //   });
-  //   emits('refresh'); // 操作单据后立即查询基本信息
-  // };
 </script>
-
-<style lang="less">
-  .ticket-detail-flow-info {
-    display: block;
-  }
-</style>

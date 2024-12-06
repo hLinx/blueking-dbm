@@ -1,6 +1,8 @@
 <template>
   <div>
-    <I18nT keypath="m_耗时_t">
+    <I18nT
+      keypath="m_耗时_t"
+      scope="global">
       <span style="color: #ff9c01">{{ t('待继续') }}</span>
       <CostTimer
         :is-timing="false"

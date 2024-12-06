@@ -25,14 +25,14 @@
       <I18nT
         v-if="totalMap.errorNum"
         keypath="检测失败_共n个错误"
-        tag="span">
+        scope="global">
         <span style="color: #b34747">{{ totalMap.errorNum }}</span>
       </I18nT>
       <template v-if="totalMap.warningNum > 0">
         <span v-if="totalMap.errorNum">，</span>
         <I18nT
           keypath="n个告警提示"
-          tag="span">
+          scope="global">
           <span style="color: #ff9c01">{{ totalMap.warningNum }}</span>
         </I18nT>
       </template>

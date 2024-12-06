@@ -1,7 +1,9 @@
 <template>
   <div>
     <div>
-      <I18nT keypath="处理人_p_耗时_t">
+      <I18nT
+        keypath="处理人_p_耗时_t"
+        scope="global">
         <span>{{ data.operators.join(',') }}</span>
         <CostTimer
           is-timing

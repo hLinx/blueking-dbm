@@ -76,6 +76,20 @@ const create = (options = {} as { exclude: string[] }) => {
 
   const formatSearchValue = computed(() => getSearchSelectorParams(value.value));
 
+  const searchFieldMap = computed(() =>
+    searchSelectData.value.reduce<Record<string, { label: string; value: string }[]>>((result, item) => {
+      if (item.children) {
+        Object.assign(result, {
+          [item.id]: item.children.map((childItem) => ({
+            label: childItem.name,
+            value: childItem.id,
+          })),
+        });
+      }
+      return result;
+    }, {}),
+  );
+
   useRequest(getTicketTypes, {
     cacheKey: 'ticketTypes',
     staleTime: 24 * 60 * 60 * 1000,
@@ -92,6 +106,7 @@ const create = (options = {} as { exclude: string[] }) => {
     value,
     searchSelectData,
     formatSearchValue,
+    searchFieldMap,
   };
 };
 
