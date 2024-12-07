@@ -37,6 +37,7 @@
           :key="item">
           {{ item }}
         </BkTag>
+        <span v-if="data.db_patterns.length < 1">--</span>
       </template>
     </BkTableColumn>
     <BkTableColumn :label="t('忽略 DB 名')">
@@ -46,6 +47,7 @@
           :key="item">
           {{ item }}
         </BkTag>
+        <span v-if="data.ignore_dbs.length < 1">--</span>
       </template>
     </BkTableColumn>
     <BkTableColumn :label="t('指定表名')">
@@ -55,6 +57,7 @@
           :key="item">
           {{ item }}
         </BkTag>
+        <span v-if="data.table_patterns.length < 1">--</span>
       </template>
     </BkTableColumn>
     <BkTableColumn :label="t('忽略表名')">
@@ -64,6 +67,7 @@
           :key="item">
           {{ item }}
         </BkTag>
+        <span v-if="data.ignore_tables.length < 1">--</span>
       </template>
     </BkTableColumn>
   </BkTable>

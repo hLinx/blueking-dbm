@@ -12,25 +12,32 @@
 -->
 
 <template>
-  <BkTable
-    :data="ticketDetails.details.infos"
-    show-overflow-tooltip>
-    <BkTableColumn :label="t('目标集群')">
+  <BkTable :data="ticketDetails.details.infos">
+    <BkTableColumn
+      fixed="left"
+      :label="t('目标集群')"
+      :min-width="220">
       <template #default="{ data }: { data: RowData }">
         {{ ticketDetails.details.clusters[data.cluster_id].immute_domain }}
       </template>
     </BkTableColumn>
-    <BkTableColumn :label="t('回档时间')">
+    <BkTableColumn
+      :label="t('回档时间')"
+      :min-width="250">
       <template #default="{ data }: { data: RowData }">
         {{ utcDisplayTime(data.start_time) }}
       </template>
     </BkTableColumn>
-    <BkTableColumn :label="t('截止时间')">
+    <BkTableColumn
+      :label="t('截止时间')"
+      :min-width="250">
       <template #default="{ data }: { data: RowData }">
         {{ utcDisplayTime(data.end_time) }}
       </template>
     </BkTableColumn>
-    <BkTableColumn :label="t('目标库')">
+    <BkTableColumn
+      :label="t('目标库')"
+      :min-width="120">
       <template #default="{ data }: { data: RowData }">
         <BkTag
           v-for="item in data.databases"
@@ -40,7 +47,9 @@
         <span v-if="data.databases.length < 1">--</span>
       </template>
     </BkTableColumn>
-    <BkTableColumn :label="t('目标表')">
+    <BkTableColumn
+      :label="t('目标表')"
+      :min-width="120">
       <template #default="{ data }: { data: RowData }">
         <BkTag
           v-for="item in data.tables"
@@ -50,7 +59,9 @@
         <span v-if="data.tables.length < 1">--</span>
       </template>
     </BkTableColumn>
-    <BkTableColumn :label="t('忽略库')">
+    <BkTableColumn
+      :label="t('忽略库')"
+      :min-width="120">
       <template #default="{ data }: { data: RowData }">
         <BkTag
           v-for="item in data.databases_ignore"
@@ -60,7 +71,9 @@
         <span v-if="data.databases_ignore.length < 1">--</span>
       </template>
     </BkTableColumn>
-    <BkTableColumn :label="t('忽略表')">
+    <BkTableColumn
+      :label="t('忽略表')"
+      :min-width="120">
       <template #default="{ data }: { data: RowData }">
         <BkTag
           v-for="item in data.tables_ignore"

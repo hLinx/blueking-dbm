@@ -11,7 +11,7 @@ export interface SpiderReduceNodes extends DetailBase {
     cluster_id: number;
     reduce_spider_role: string;
     spider_reduced_to_count: number;
-    spider_reduced_hosts: {
+    spider_reduced_hosts?: {
       ip: string;
       bk_host_id: number;
       bk_cloud_id: number;

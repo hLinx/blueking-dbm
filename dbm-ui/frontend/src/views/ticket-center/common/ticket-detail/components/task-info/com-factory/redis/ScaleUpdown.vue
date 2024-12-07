@@ -12,24 +12,27 @@
 -->
 
 <template>
-  <BkTable
-    :data="ticketDetails.details.infos"
-    show-overflow-tooltip>
+  <BkTable :data="ticketDetails.details.infos">
     <BkTableColumn
+      fixed="left"
       :label="t('源集群')"
-      :min-width="180">
+      :min-width="220"
+      :show-overflow="false">
       <template #default="{ data }: { data: RowData }">
         {{ ticketDetails.details.clusters[data.cluster_id].immute_domain }}
       </template>
     </BkTableColumn>
-    <BkTableColumn :label="t('架构版本')">
+    <BkTableColumn
+      :label="t('架构版本')"
+      :min-width="180">
       <template #default="{ data }: { data: RowData }">
         {{ ticketDetails.details.clusters[data.cluster_id].cluster_type_name }}
       </template>
     </BkTableColumn>
     <BkTableColumn
       field="db_version"
-      :label="t('Redis版本')">
+      :label="t('Redis版本')"
+      :min-width="100">
     </BkTableColumn>
     <BkTableColumn
       :label="t('当前容量')"

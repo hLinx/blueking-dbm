@@ -14,7 +14,7 @@
   defineProps<Props>();
 </script>
 <style lang="less">
-  @label-width: 100px;
+  @label-width: 150px;
 
   .db-ticket-info-item {
     flex: 0 0 50%;

@@ -51,14 +51,14 @@
       :label="t('校验从库')"
       :width="220">
       <template #default="{ data }: { data: RowData }">
-        {{ data.slave }}
+        {{ data.slave || '--' }}
       </template>
     </BkTableColumn>
     <BkTableColumn
       :label="t('校验主库')"
       :width="220">
       <template #default="{ data }: { data: RowData }">
-        {{ data.slave }}
+        {{ data.master || '--' }}
       </template>
     </BkTableColumn>
     <BkTableColumn

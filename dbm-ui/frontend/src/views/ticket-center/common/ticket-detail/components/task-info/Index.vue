@@ -20,7 +20,7 @@
       class="ticket-details-page"
       :data="data" />
     <InfoList>
-      <Item :label="t('备注：')">
+      <Item :label="t('备注:')">
         {{ data.remark || '--' }}
       </Item>
     </InfoList>
