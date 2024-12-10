@@ -29,4 +29,5 @@ export interface ProxySwitch extends DetailBase {
       port?: number;
     };
   }[];
+  ip_source: string;
 }

@@ -72,12 +72,13 @@ export interface SpecInfo {
     max: number;
     min: number;
   };
-  spec_id: number;
-  spec_name: string;
   mem: {
     max: number;
     min: number;
   };
+  qps: Record<string, any>;
+  spec_id: number;
+  spec_name: string;
   storage_spec: {
     mount_point: string;
     size: number;

@@ -15,17 +15,24 @@
   <BkTable
     :data="ticketDetails.details.infos"
     show-overflow-tooltip>
-    <BkTableColumn :label="t('目标集群')">
+    <BkTableColumn
+      fixed="left"
+      :label="t('目标集群')"
+      :min-width="220">
       <template #default="{ data }: { data: RowData }">
         {{ ticketDetails.details.clusters[data.cluster_id].immute_domain }}
       </template>
     </BkTableColumn>
-    <BkTableColumn :label="t('回档时间')">
+    <BkTableColumn
+      :label="t('回档时间')"
+      :min-width="180">
       <template #default="{ data }: { data: RowData }">
         {{ dayjs(data.start_time).format('YYYY-MM-DD HH:mm:ss ZZ') }}
       </template>
     </BkTableColumn>
-    <BkTableColumn :label="t('截止时间')">
+    <BkTableColumn
+      :label="t('截止时间')"
+      :min-width="180">
       <template #default="{ data }: { data: RowData }">
         {{ dayjs(data.end_time).format('YYYY-MM-DD HH:mm:ss ZZ') }}
       </template>
@@ -40,16 +47,6 @@
         <span v-if="data.databases.length < 1">--</span>
       </template>
     </BkTableColumn>
-    <BkTableColumn :label="t('目标表')">
-      <template #default="{ data }: { data: RowData }">
-        <BkTag
-          v-for="item in data.tables"
-          :key="item">
-          {{ item }}
-        </BkTag>
-        <span v-if="data.tables.length < 1">--</span>
-      </template>
-    </BkTableColumn>
     <BkTableColumn :label="t('忽略库')">
       <template #default="{ data }: { data: RowData }">
         <BkTag
@@ -58,6 +55,16 @@
           {{ item }}
         </BkTag>
         <span v-if="data.databases_ignore.length < 1">--</span>
+      </template>
+    </BkTableColumn>
+    <BkTableColumn :label="t('目标表')">
+      <template #default="{ data }: { data: RowData }">
+        <BkTag
+          v-for="item in data.tables"
+          :key="item">
+          {{ item }}
+        </BkTag>
+        <span v-if="data.tables.length < 1">--</span>
       </template>
     </BkTableColumn>
     <BkTableColumn :label="t('忽略表')">

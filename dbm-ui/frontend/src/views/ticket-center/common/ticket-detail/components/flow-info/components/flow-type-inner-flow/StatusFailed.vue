@@ -4,10 +4,21 @@
     :ticket-detail="ticketDetail">
     <template #content>
       <I18nT
+        v-if="isNeedOperation"
         keypath="m_处理人_p_耗时_t"
         scope="global">
         <span style="color: #ea3636">{{ t('执行失败') }}</span>
         <span>{{ ticketDetail.todo_operators.join(',') }}</span>
+        <CostTimer
+          :is-timing="false"
+          :start-time="utcTimeToSeconds(data.start_time)"
+          :value="data.cost_time" />
+      </I18nT>
+      <I18nT
+        v-else
+        keypath="m_耗时_t"
+        scope="global">
+        <span style="color: #ea3636">{{ t('执行失败') }}</span>
         <CostTimer
           :is-timing="false"
           :start-time="utcTimeToSeconds(data.start_time)"

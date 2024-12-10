@@ -12,11 +12,6 @@
 -->
 
 <template>
-  <InfoList>
-    <InfoItem :label="t('备份源:')">
-      {{ ticketDetails.details.backup_source === 'local' ? t('本地备份') : t('远程备份') }}
-    </InfoItem>
-  </InfoList>
   <BkTable
     :data="ticketDetails.details.infos"
     show-overflow-tooltip>
@@ -30,12 +25,32 @@
         </div>
       </template>
     </BkTableColumn>
-    <BkTableColumn :label="t('新从库主机')">
+    <BkTableColumn :label="t('新主从主机')">
       <template #default="{ data }: { data: RowData }">
-        {{ data?.new_slave?.ip }}
+        <div>
+          <BkTag
+            size="small"
+            theme="success">
+            M
+          </BkTag>
+          {{ data.new_master.ip }}
+        </div>
+        <div>
+          <BkTag
+            size="small"
+            theme="info">
+            S
+          </BkTag>
+          {{ data.new_slave.ip }}
+        </div>
       </template>
     </BkTableColumn>
   </BkTable>
+  <InfoList>
+    <InfoItem :label="t('备份源:')">
+      {{ ticketDetails.details.backup_source === 'local' ? t('本地备份') : t('远程备份') }}
+    </InfoItem>
+  </InfoList>
 </template>
 <script setup lang="ts">
   import { useI18n } from 'vue-i18n';

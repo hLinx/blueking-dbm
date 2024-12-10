@@ -13,22 +13,24 @@
 <template>
   <InfoList>
     <InfoItem :label="t('所属业务:')">
-      {{ ticketDetails?.bk_biz_name || '--' }}
+      {{ ticketDetails.bk_biz_name || '--' }}
     </InfoItem>
     <InfoItem :label="t('指定执行时间:')">
-      {{ utcDisplayTime(ticketDetails?.details?.timing) || '--' }}
+      {{ utcDisplayTime(ticketDetails.details.timing) || '--' }}
     </InfoItem>
     <InfoItem :label="t('自动修复:')">
-      {{ ticketDetails?.details?.data_repair.is_repair ? t('是') : t('否') }}
+      {{ ticketDetails.details.data_repair.is_repair ? t('是') : t('否') }}
     </InfoItem>
-    <InfoItem :label="t('全局超时时间:')">
-      {{ ticketDetails?.details?.runtime_hour || '--' }}
+    <InfoItem :label="t('全局超时时间（h）:')">
+      {{ ticketDetails.details.runtime_hour }}
     </InfoItem>
   </InfoList>
   <BkTable
     :data="ticketDetails.details.infos"
     show-overflow-tooltip>
-    <BkTableColumn :label="t('目标集群')">
+    <BkTableColumn
+      :label="t('目标集群')"
+      :min-width="220">
       <template #default="{ data }: { data: RowData }">
         {{ ticketDetails.details.clusters[data.cluster_id].immute_domain }}
       </template>

@@ -15,25 +15,52 @@
   <BkTable
     :data="ticketDetails.details.infos"
     show-overflow-tooltip>
-    <BkTableColumn :label="t('源集群')">
+    <BkTableColumn
+      fixed="left"
+      :label="t('源集群')"
+      :min-width="220">
       <template #default="{ data }: { data: RowData }">
         {{ ticketDetails.details.clusters[data.source_cluster].immute_domain }}
       </template>
     </BkTableColumn>
-    <BkTableColumn :label="t('目标集群')">
+    <BkTableColumn
+      :label="t('目标集群')"
+      :min-width="220">
       <template #default="{ data }: { data: RowData }">
-        {{ getTargetClusters(data.target_clusters) }}
+        <div
+          v-for="clusterId in data.target_clusters"
+          :key="clusterId">
+          {{ ticketDetails.details.clusters[clusterId].immute_domain }}
+        </div>
       </template>
     </BkTableColumn>
-    <BkTableColumn :label="t('迁移DB名')">
-      <template #default> -- </template>
-    </BkTableColumn>
-    <BkTableColumn :label="t('忽略DB名')">
-      <template #default> -- </template>
-    </BkTableColumn>
-    <BkTableColumn :label="t('最终DB名')">
+    <BkTableColumn
+      :label="t('克隆类型')"
+      :min-width="180">
       <template #default="{ data }: { data: RowData }">
-        {{ data?.db_list?.join(',') }}
+        {{ data.data_schema_grant === 'schema' ? t('克隆表结构') : t('克隆表结构和数据') }}
+      </template>
+    </BkTableColumn>
+    <BkTableColumn
+      :label="t('迁移DB名')"
+      :min-width="180">
+      <template #default> -- </template>
+    </BkTableColumn>
+    <BkTableColumn
+      :label="t('忽略DB名')"
+      :min-width="180">
+      <template #default> -- </template>
+    </BkTableColumn>
+    <BkTableColumn
+      :label="t('最终DB名')"
+      :min-width="180">
+      <template #default="{ data }: { data: RowData }">
+        <BkTag
+          v-for="item in data.db_list"
+          :key="item">
+          {{ item }}
+        </BkTag>
+        <span v-if="data.db_list.length < 1">--</span>
       </template>
     </BkTableColumn>
   </BkTable>
@@ -51,7 +78,7 @@
 
   type RowData = Props['ticketDetails']['details']['infos'][number];
 
-  const props = defineProps<Props>();
+  defineProps<Props>();
 
   defineOptions({
     name: TicketTypes.MYSQL_DATA_MIGRATE,
@@ -59,12 +86,4 @@
   });
 
   const { t } = useI18n();
-
-  const getTargetClusters = (arr) => {
-    if (!arr || !arr.length) {
-      return '--';
-    }
-    const result = arr.map((item) => props.ticketDetails.details.clusters[item].immute_domain);
-    return result?.join(',');
-  };
 </script>

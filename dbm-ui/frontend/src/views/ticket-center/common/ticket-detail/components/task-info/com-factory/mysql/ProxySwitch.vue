@@ -51,6 +51,11 @@
       </template>
     </BkTableColumn>
   </BkTable>
+  <InfoList>
+    <InfoItem :label="t('忽略业务连接：')">
+      {{ ticketDetails.details.force ? t('是') : t('否') }}
+    </InfoItem>
+  </InfoList>
 </template>
 <script setup lang="ts">
   import { useI18n } from 'vue-i18n';

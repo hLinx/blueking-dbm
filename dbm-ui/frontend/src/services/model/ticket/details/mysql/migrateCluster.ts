@@ -14,16 +14,14 @@ export interface MigrateCluster extends DetailBase {
       bk_cloud_id: number;
       bk_host_id: number;
       ip: string;
-      port?: number;
     };
     new_slave: {
       bk_biz_id: number;
       bk_cloud_id: number;
       bk_host_id: number;
       ip: string;
-      port?: number;
     };
   }[];
-  is_safe: boolean;
   ip_source: string;
+  is_safe: boolean;
 }

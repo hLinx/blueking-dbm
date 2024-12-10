@@ -14,7 +14,7 @@
 <template>
   <BkTable
     :data="ticketDetails.details.infos"
-    show-overflow-tooltip>
+    :show-overflow="false">
     <BkTableColumn :label="t('目标集群')">
       <template #default="{ data }: { data: RowData }">
         <p
@@ -26,13 +26,32 @@
     </BkTableColumn>
     <BkTableColumn :label="t('主从主机')">
       <template #default="{ data }: { data: RowData }">
-        <p><BkTag theme="info">M</BkTag>{{ data.display_info.old_master_slave[0] }}</p>
-        <p><BkTag theme="success">S</BkTag>{{ data.display_info.old_master_slave[1] }}</p>
+        <div>
+          <BkTag
+            size="small"
+            theme="info">
+            M
+          </BkTag>
+          {{ data.display_info.old_master_slave[0] }}
+        </div>
+        <div>
+          <BkTag
+            size="small"
+            theme="success">
+            S
+          </BkTag>
+          {{ data.display_info.old_master_slave[1] }}
+        </div>
       </template>
     </BkTableColumn>
     <BkTableColumn :label="t('只读主机')">
       <template #default="{ data }: { data: RowData }">
-        {{ data.read_only_slaves.length ? data.read_only_slaves.map((item) => item.old_slave.ip).join(',') : '--' }}
+        <div
+          v-for="host in data.read_only_slaves"
+          :key="host.old_slave.bk_host_id">
+          {{ host.old_slave.ip }}
+        </div>
+        <span v-if="data.read_only_slaves.length < 1"> -- </span>
       </template>
     </BkTableColumn>
     <BkTableColumn :label="t('当前版本')">
@@ -59,7 +78,22 @@
     </BkTableColumn>
     <BkTableColumn :label="t('新主从主机')">
       <template #default="{ data }: { data: RowData }">
-        {{ `${data.new_master.ip};${data.new_slave.ip}` }}
+        <div>
+          <BkTag
+            size="small"
+            theme="info">
+            M
+          </BkTag>
+          {{ data.new_master.ip }}
+        </div>
+        <div>
+          <BkTag
+            size="small"
+            theme="success">
+            S
+          </BkTag>
+          {{ data.new_slave.ip }}
+        </div>
       </template>
     </BkTableColumn>
     <BkTableColumn :label="t('新只读主机')">
