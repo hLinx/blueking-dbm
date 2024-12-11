@@ -12,9 +12,31 @@
 -->
 
 <template>
-  <DbOriginalTable
-    :columns="columns"
-    :data="tableData" />
+  <BkTable :data="ticketDetails.details.infos">
+    <BkTableColumn
+      :label="t('目标集群')"
+      :min-width="250">
+      <template #default="{data}: {data: IRowData}">
+        {{ ticketDetails.details.clusters[data.cluster_id].immute_domain }}
+      </template>
+    </BkTableColumn>
+    <BkTableColumn :label="t('架构版本')">
+      <template #default="{data}: {data: IRowData}">
+        {{ ticketDetails.details.clusters[data.cluster_id].cluster_type_name }}
+      </template>
+    </BkTableColumn>
+    <BkTableColumn :label="t('扩容节点类型')"> Proxy </BkTableColumn>
+    <BkTableColumn :label="t('当前规格')">
+      <template #default="{data}: {data: IRowData}">
+        {{ ticketDetails.details.specs[data.resource_spec.proxy.spec_id].name }}
+      </template>
+    </BkTableColumn>
+    <BkTableColumn :label="t('扩容数量（台）')">
+      <template #default="{data}: {data: IRowData}">
+        {{ data.target_proxy_count }}
+      </template>
+    </BkTableColumn>
+  </BkTable>
 </template>
 
 <script setup lang="tsx">
@@ -25,67 +47,17 @@
   import { TicketTypes } from '@common/const';
 
   interface Props {
-    ticketDetails: TicketModel<Redis.ProxyScaleUp>
+    ticketDetails: TicketModel<Redis.ProxyScaleUp>;
   }
 
-  interface RowData {
-    clusterName: string,
-    clusterType: string,
-    nodeType: string,
-    sepc: {
-      id: number,
-      name: string,
-    },
-    targetNum: number,
-  }
-
-  const props = defineProps<Props>();
+  defineProps<Props>();
 
   defineOptions({
     name: TicketTypes.REDIS_PROXY_SCALE_UP,
-    inheritAttrs: false
-  })
+    inheritAttrs: false,
+  });
+
+  type IRowData = Props['ticketDetails']['details']['infos'][number];
 
   const { t } = useI18n();
-
-  const { clusters, infos, specs } = props.ticketDetails.details;
-
-  const columns = [
-    {
-      label: t('目标集群'),
-      field: 'clusterName',
-      showOverflowTooltip: true,
-    },
-    {
-      label: t('架构版本'),
-      field: 'clusterTypeName',
-      showOverflowTooltip: true,
-    },
-    {
-      label: t('扩容节点类型'),
-      field: 'nodeType',
-    },
-    {
-      label: t('当前规格'),
-      field: 'sepc',
-      showOverflowTooltip: true,
-      render: ({ data }: {data: RowData}) => <span>{data.sepc.name}</span>,
-    },
-    {
-      label: t('扩容至(台)'),
-      field: 'targetNum',
-    },
-  ];
-
-  const tableData = infos.map((item) => ({
-      clusterName: clusters[item.cluster_id].immute_domain,
-      clusterType: clusters[item.cluster_id].cluster_type,
-      clusterTypeName: clusters[item.cluster_id].cluster_type_name,
-      nodeType: 'Proxy',
-      sepc: {
-        id: item.resource_spec.proxy.spec_id,
-        name: specs[item.resource_spec.proxy.spec_id].name,
-      },
-      targetNum: item.target_proxy_count,
-    }));
 </script>

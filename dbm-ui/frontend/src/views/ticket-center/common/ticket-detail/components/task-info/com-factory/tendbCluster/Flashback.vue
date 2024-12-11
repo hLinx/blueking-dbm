@@ -48,18 +48,6 @@
       </template>
     </BkTableColumn>
     <BkTableColumn
-      :label="t('目标表')"
-      :min-width="120">
-      <template #default="{ data }: { data: RowData }">
-        <BkTag
-          v-for="item in data.tables"
-          :key="item">
-          {{ item }}
-        </BkTag>
-        <span v-if="data.tables.length < 1">--</span>
-      </template>
-    </BkTableColumn>
-    <BkTableColumn
       :label="t('忽略库')"
       :min-width="120">
       <template #default="{ data }: { data: RowData }">
@@ -69,6 +57,18 @@
           {{ item }}
         </BkTag>
         <span v-if="data.databases_ignore.length < 1">--</span>
+      </template>
+    </BkTableColumn>
+    <BkTableColumn
+      :label="t('目标表')"
+      :min-width="120">
+      <template #default="{ data }: { data: RowData }">
+        <BkTag
+          v-for="item in data.tables"
+          :key="item">
+          {{ item }}
+        </BkTag>
+        <span v-if="data.tables.length < 1">--</span>
       </template>
     </BkTableColumn>
     <BkTableColumn

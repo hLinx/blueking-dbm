@@ -70,18 +70,7 @@
       label: t('域名'),
       field: 'domain',
       showOverflowTooltip: false,
-      render: ({ data } : { data: RedisAssign }) => (
-       <div class="cluster-name text-overflow"
-         v-overflow-tips={{
-           content: `
-             <p>${t('域名')}：${data.domain}</p>
-             ${data.name ? `<p>${('集群别名')}：${data.name}</p>` : null}
-           `,
-           allowHTML: true,
-       }}>
-         <span>{data.domain}</span>
-       </div>
-     ),
+      render: ({ data } : { data: RedisAssign }) => data.domain,
     },
     {
       label: t('架构版本'),

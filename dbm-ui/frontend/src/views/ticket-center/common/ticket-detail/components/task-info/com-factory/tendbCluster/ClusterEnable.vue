@@ -13,22 +13,14 @@
 
 <template>
   <BatchClusterOperation :ticket-details="ticketDetails" />
-  <InfoList>
-    <InfoItem :label="t('只读集群名称')">
-      {{ ticketDetails.details.is_only_add_slave_domain ? t('是') : t('否') }}
-    </InfoItem>
-  </InfoList>
 </template>
 
 <script setup lang="ts">
-  import { useI18n } from 'vue-i18n';
-
   import TicketModel, { type TendbCluster } from '@services/model/ticket/ticket';
 
   import { TicketTypes } from '@common/const';
 
   import BatchClusterOperation from '../common/BatchClusterOperation.vue';
-  import InfoList, { Item as InfoItem } from '../components/info-list/Index.vue';
 
   interface Props {
     ticketDetails: TicketModel<TendbCluster.Enable>;
@@ -40,6 +32,4 @@
     name: TicketTypes.TENDBCLUSTER_ENABLE,
     inheritAttrs: false,
   });
-
-  const { t } = useI18n();
 </script>

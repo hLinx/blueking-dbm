@@ -12,11 +12,6 @@
 -->
 
 <template>
-  <InfoList>
-    <InfoItem :label="t('安全模式:')">
-      {{ !ticketDetails.details.infos[0].force ? t('是') : t('否') }}
-    </InfoItem>
-  </InfoList>
   <BkTable
     :data="ticketDetails.details.infos"
     show-overflow-tooltip>
@@ -71,6 +66,11 @@
       </template>
     </BkTableColumn>
   </BkTable>
+  <InfoList>
+    <InfoItem :label="t('安全模式:')">
+      {{ !ticketDetails.details.infos[0].force ? t('是') : t('否') }}
+    </InfoItem>
+  </InfoList>
 </template>
 
 <script setup lang="ts">

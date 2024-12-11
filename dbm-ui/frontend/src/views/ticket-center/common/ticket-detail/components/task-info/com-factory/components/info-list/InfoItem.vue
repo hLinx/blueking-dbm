@@ -17,7 +17,7 @@
   @label-width: 150px;
 
   .db-ticket-info-item {
-    flex: 0 0 50%;
+    flex: 1 0 50%;
     display: flex;
     align-items: flex-start;
     min-height: 32px;

@@ -15,8 +15,8 @@
     :data="ticketDetails.details.infos"
     show-overflow-tooltip>
     <BkTableColumn
-      :label="t('源集群')"
-      :min-width="180">
+      :label="t('目标集群')"
+      :min-width="250">
       <template #default="{ data }: { data: RowData }">
         {{ ticketDetails.details.clusters[data.cluster_id].immute_domain }}
       </template>
@@ -46,7 +46,6 @@
     </BkTableColumn>
   </BkTable>
 </template>
-
 <script setup lang="ts">
   import { useI18n } from 'vue-i18n';
 

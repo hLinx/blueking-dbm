@@ -13,157 +13,147 @@
 
 <template>
   <div>
-    <strong class="ticket-details-info-title">{{ t('业务信息') }}</strong>
-    <div class="ticket-details-list">
-      <div class="ticket-details-item">
-        <span class="ticket-details-item-label">{{ t('所属业务') }}：</span>
-        <span class="ticket-details-item-value">{{ ticketDetails?.bk_biz_name || '--' }}</span>
-      </div>
-      <div class="ticket-details-item">
-        <span class="ticket-details-item-label">{{ t('业务英文名') }}：</span>
-        <span class="ticket-details-item-value">{{ ticketDetails?.db_app_abbr || '--' }}</span>
-      </div>
-      <div class="ticket-details-item">
-        <span class="ticket-details-item-label">{{ t('集群名称') }}：</span>
-        <span class="ticket-details-item-value">{{ ticketDetails?.details?.cluster_name || '--' }}</span>
-      </div>
-      <div class="ticket-details-item">
-        <span class="ticket-details-item-label">{{ t('集群别名') }}：</span>
-        <span class="ticket-details-item-value">{{ ticketDetails?.details?.cluster_alias || '--' }}</span>
-      </div>
-    </div>
-    <strong class="ticket-details-info-title">{{ t('地域要求') }}</strong>
-    <div class="ticket-details-list">
-      <div class="ticket-details-item">
-        <span class="ticket-details-item-label">{{ t('数据库部署地域') }}：</span>
-        <span class="ticket-details-item-value">{{ cityName }}</span>
-      </div>
-    </div>
-    <strong class="ticket-details-info-title">{{ t('数据库部署信息') }}</strong>
-    <div class="ticket-details-list">
-      <div class="ticket-details-item">
-        <span class="ticket-details-item-label">{{ t('容灾要求') }}：</span>
-        <span class="ticket-details-item-value">{{ affinity }}</span>
-      </div>
-    </div>
-    <strong class="ticket-details-info-title">{{ t('部署需求') }}</strong>
-    <div class="ticket-details-list">
-      <div class="ticket-details-item">
-        <span class="ticket-details-item-label">{{ t('部署架构') }}：</span>
-        <span class="ticket-details-item-value">{{ getClusterType() }}</span>
-      </div>
-      <div class="ticket-details-item">
-        <span class="ticket-details-item-label">{{ t('版本') }}：</span>
-        <span class="ticket-details-item-value">{{ ticketDetails?.details?.db_version || '--' }}</span>
-      </div>
-      <div class="ticket-details-item">
-        <span class="ticket-details-item-label">{{ t('服务器') }}：</span>
-        <span class="ticket-details-item-value">{{ getIpSource() }}</span>
-      </div>
-      <div class="ticket-details-item">
-        <span class="ticket-details-item-label">{{ t('服务器') }}：</span>
-        <span class="ticket-details-item-value">{{ getIpSource() }}</span>
-      </div>
-      <div class="ticket-details-item">
-        <span class="ticket-details-item-label">{{ t('访问端口') }}：</span>
-        <span class="ticket-details-item-value">{{ ticketDetails?.details?.proxy_port }}</span>
-      </div>
-      <div class="ticket-details-item">
-        <span class="ticket-details-item-label">{{ t('备注') }}：</span>
-        <span class="ticket-details-item-value">{{ ticketDetails?.remark || '--' }}</span>
-      </div>
-      <template v-if="ticketDetails?.details?.ip_source === redisIpSources.manual_input.id">
-        <div class="ticket-details-item">
-          <span class="ticket-details-item-label">{{ t('申请容量') }}：</span>
-          <span class="ticket-details-item-value">{{ getCapSpecDisplay() }}</span>
-        </div>
-        <div class="ticket-details-item">
-          <span class="ticket-details-item-label">Proxy：</span>
-          <span class="ticket-details-item-value">
-            <span
-              v-if="getServiceNums('proxy') > 0"
-              class="host-nums"
-              @click="handleShowPreview('proxy')">
-              <a href="javascript:">{{ getServiceNums('proxy') }}</a>
-              {{ t('台') }}
-            </span>
-            <template v-else>--</template>
+    <div class="ticket-details-info-title">{{ t('业务信息') }}</div>
+    <InfoList>
+      <InfoItem :label="t('所属业务')">
+        {{ ticketDetails?.bk_biz_name || '--' }}
+      </InfoItem>
+      <InfoItem :label="t('业务英文名')">
+        {{ ticketDetails?.db_app_abbr || '--' }}
+      </InfoItem>
+      <InfoItem :label="t('集群名称')">
+        {{ ticketDetails.details.cluster_name || '--' }}
+      </InfoItem>
+      <InfoItem :label="t('集群别名')">
+        {{ ticketDetails.details.cluster_alias || '--' }}
+      </InfoItem>
+    </InfoList>
+    <div class="ticket-details-info-title mt-20">{{ t('地域要求') }}</div>
+    <InfoList>
+      <InfoItem :label="t('数据库部署地域')">
+        {{ ticketDetails?.details.city_name || '--' }}
+      </InfoItem>
+    </InfoList>
+    <div class="ticket-details-info-title mt-20">{{ t('数据库部署信息') }}</div>
+    <InfoList>
+      <InfoItem :label="t('容灾要求')">
+        {{ affinity }}
+      </InfoItem>
+    </InfoList>
+    <div class="ticket-details-info-title mt-20">{{ t('部署需求') }}</div>
+    <InfoList>
+      <InfoItem :label="t('部署架构')">
+        {{ redisClusterTypes[ticketDetails.details.cluster_type as RedisClusterTypes]?.text || '--' }}
+      </InfoItem>
+      <InfoItem :label="t('版本')">
+        {{ ticketDetails.details.db_version || '--' }}
+      </InfoItem>
+      <InfoItem :label="t('服务器')">
+        {{ redisIpSources[ticketDetails.details.ip_source as RedisIpSources]?.text || '--' }}
+      </InfoItem>
+      <InfoItem :label="t('访问端口')">
+        {{ ticketDetails.details.proxy_port }}
+      </InfoItem>
+      <template v-if="ticketDetails.details.ip_source === redisIpSources.manual_input.id">
+        <InfoItem :label="t('申请容量')">
+          {{ getCapSpecDisplay() }}
+        </InfoItem>
+        <InfoItem label="Proxy：">
+          <span
+            v-if="getServiceNums('proxy') > 0"
+            class="host-nums"
+            @click="handleShowPreview('proxy')">
+            <a href="javascript:">{{ getServiceNums('proxy') }}</a>
+            {{ t('台') }}
           </span>
-        </div>
-        <div class="ticket-details-item">
-          <span class="ticket-details-item-label">Master：</span>
-          <span class="ticket-details-item-value">
-            <span
-              v-if="getServiceNums('master') > 0"
-              class="host-nums"
-              @click="handleShowPreview('master')">
-              <a href="javascript:">{{ getServiceNums('master') }}</a>
-              {{ t('台') }}
-            </span>
-            <template v-else>--</template>
+          <template v-else>--</template>
+        </InfoItem>
+        <InfoItem label="Master：">
+          <span
+            v-if="getServiceNums('master') > 0"
+            class="host-nums"
+            @click="handleShowPreview('master')">
+            <a href="javascript:">{{ getServiceNums('master') }}</a>
+            {{ t('台') }}
           </span>
-        </div>
-        <div class="ticket-details-item">
-          <span class="ticket-details-item-label">Slave：</span>
-          <span class="ticket-details-item-value">
-            <span
-              v-if="getServiceNums('slave') > 0"
-              class="host-nums"
-              @click="handleShowPreview('slave')">
-              <a href="javascript:">{{ getServiceNums('slave') }}</a>
-              {{ t('台') }}
-            </span>
-            <template v-else>--</template>
+          <template v-else>--</template>
+        </InfoItem>
+        <InfoItem label="Slave：">
+          <span
+            v-if="getServiceNums('slave') > 0"
+            class="host-nums"
+            @click="handleShowPreview('slave')">
+            <a href="javascript:">{{ getServiceNums('slave') }}</a>
+            {{ t('台') }}
           </span>
-        </div>
-        <div class="ticket-details-item">
-          <span class="ticket-details-item-label">{{ t('Proxy端口') }}：</span>
-          <span class="ticket-details-item-value">{{ ticketDetails?.details?.proxy_port || '--' }}</span>
-        </div>
+          <template v-else>--</template>
+        </InfoItem>
       </template>
       <template v-else>
-        <div class="ticket-details-item">
-          <span class="ticket-details-item-label">{{ t('Proxy存储资源规格') }}：</span>
-          <span class="ticket-details-item-value">
-            <BkPopover
-              placement="top"
-              theme="light">
-              <span
-                class="pb-2"
-                style="cursor: pointer; border-bottom: 1px dashed #979ba5">
-                {{ proxySpec?.spec_name }}（{{ `${proxySpec?.count} ${t('台')}` }}）
-              </span>
-              <template #content>
-                <SpecInfos :data="proxySpec" />
+        <InfoItem :label="t('Proxy存储资源规格')">
+          <BkPopover
+            placement="top"
+            theme="light">
+            <span
+              class="pb-2"
+              style="cursor: pointer; border-bottom: 1px dashed #979ba5">
+              {{ ticketDetails.details.resource_spec.proxy.spec_name }}（{{
+                `${ticketDetails.details.resource_spec.proxy.count} ${t('台')}`
+              }}）
+            </span>
+            <template #content>
+              <SpecInfos :data="ticketDetails.details.resource_spec.proxy" />
+            </template>
+          </BkPopover>
+        </InfoItem>
+        <InfoItem
+          :label="t('集群部署方案')"
+          style="width: 100%">
+          <BkTable :data="[ticketDetails.details.resource_spec.backend_group.spec_info]">
+            <BkTableColumn
+              field="spec_name"
+              :label="t('资源规格')" />
+            <BkTableColumn
+              field="machine_pair"
+              :label="t('需机器组数')" />
+            <BkTableColumn
+              field="cluster_shard_num"
+              :label="t('集群分片')" />
+            <BkTableColumn
+              field="cluster_capacity"
+              :label="t('集群容量G')" />
+            <BkTableColumn
+              field="cluster_capacity"
+              :label="t('集群容量G')">
+              <template
+                #default="{
+                  data,
+                }: {
+                  data: Props['ticketDetails']['details']['resource_spec']['backend_group']['spec_info'];
+                }">
+                {{ data.qps.min * data.machine_pair || '--' }}
               </template>
-            </BkPopover>
-          </span>
-        </div>
-        <div class="ticket-details-item whole mt-8">
-          <span class="ticket-details-item-label">{{ t('集群部署方案') }}：</span>
-          <span class="ticket-details-item-value">
-            <DbOriginalTable
-              class="custom-edit-table"
-              :columns="columns"
-              :data="backendData" />
-          </span>
-        </div>
+            </BkTableColumn>
+          </BkTable>
+        </InfoItem>
       </template>
-    </div>
+    </InfoList>
     <HostPreview
       v-model:is-show="previewState.isShow"
       :fetch-nodes="getTicketHostNodes"
-      :fetch-params="fetchNodesParams"
+      :fetch-params="{
+        bk_biz_id: ticketDetails.bk_biz_id,
+        id: ticketDetails.id,
+        role: previewState.role,
+      }"
       :title="previewState.title" />
   </div>
 </template>
-
-<script setup lang="tsx">
+<script setup lang="ts">
   import { useI18n } from 'vue-i18n';
-  import { useRequest } from 'vue-request';
 
   import TicketModel, { type Redis } from '@services/model/ticket/ticket';
-  import { getInfrasCities, getTicketHostNodes } from '@services/source/ticket';
+  import { getTicketHostNodes } from '@services/source/ticket';
 
   import { TicketTypes } from '@common/const';
 
@@ -179,6 +169,7 @@
   import { firstLetterToUpper } from '@utils';
 
   import { useAffinity } from '../../hooks/useAffinity';
+  import InfoList, { Item as InfoItem } from '../components/info-list/Index.vue';
   import SpecInfos from '../components/SpecInfos.vue';
 
   interface Props {
@@ -194,99 +185,29 @@
   const { t } = useI18n();
   const { affinity } = useAffinity(props.ticketDetails);
 
-  const cityName = ref('--');
-
   const previewState = reactive({
     isShow: false,
     role: '',
     title: t('主机预览'),
   });
 
-  const fetchNodesParams = computed(() => ({
-    bk_biz_id: props.ticketDetails.bk_biz_id,
-    id: props.ticketDetails.id,
-    role: previewState.role,
-  }));
-
-  const proxySpec = computed(() => props.ticketDetails?.details?.resource_spec?.proxy || {});
-  const backendData = computed(() => {
-    const data = props.ticketDetails?.details?.resource_spec?.backend_group?.spec_info;
-    return data ? [data] : [];
-  });
-
-  const columns = [
-    {
-      field: 'spec_name',
-      label: t('资源规格'),
-      showOverflowTooltip: true,
-    },
-    {
-      field: 'machine_pair',
-      label: t('需机器组数'),
-    },
-    {
-      field: 'cluster_shard_num',
-      label: t('集群分片'),
-    },
-    {
-      field: 'cluster_capacity',
-      label: t('集群容量G'),
-    },
-    {
-      field: 'qps',
-      label: t('集群QPS每秒'),
-      render: ({ data }: { data: Props['ticketDetails']['details']['resource_spec']['backend_group']['spec_info'] }) =>
-        (data?.qps?.min || 0) * data.machine_pair,
-    },
-  ];
-
-  useRequest(getInfrasCities, {
-    onSuccess: (cityList) => {
-      const cityCode = props.ticketDetails.details.city_code;
-      const name = cityList.find((item) => item.city_code === cityCode)?.city_name;
-      cityName.value = name ?? '--';
-    },
-  });
-
   /**
    * 获取申请容量内容
    */
   const getCapSpecDisplay = () => {
-    if (!props.ticketDetails?.details?.cap_spec) {
+    if (!props.ticketDetails.details.cap_spec) {
       return '--';
     }
 
-    const capSpecArr: string[] = props.ticketDetails?.details?.cap_spec.split(':');
+    const capSpecArr: string[] = props.ticketDetails.details.cap_spec.split(':');
     return `${capSpecArr[0]}(${(Number(capSpecArr[1]) / 1024).toFixed(2)} GB x ${capSpecArr[2]}${t('分片')})`;
-  };
-
-  /**
-   * 获取部署架构类型
-   */
-  const getClusterType = () => {
-    if (!props.ticketDetails?.details?.cluster_type) {
-      return '--';
-    }
-
-    return redisClusterTypes[props.ticketDetails.details.cluster_type as RedisClusterTypes]?.text || '--';
-  };
-
-  /**
-   * 获取服务器类型
-   */
-  const getIpSource = () => {
-    if (!props.ticketDetails?.details?.ip_source) {
-      return '--';
-    }
-
-    return redisIpSources[props.ticketDetails.details.ip_source as RedisIpSources]?.text || '--';
   };
 
   /**
    * 获取服务器数量
    */
   const getServiceNums = (key: 'proxy' | 'master' | 'slave') => {
-    const nodes = props.ticketDetails?.details?.nodes;
+    const { nodes } = props.ticketDetails.details;
     return nodes?.[key]?.length ?? 0;
   };
 
@@ -299,3 +220,8 @@
     previewState.title = `【${firstLetterToUpper(role)}】${t('主机预览')}`;
   };
 </script>
+<style lang="less" scoped>
+  .ticket-details-info-title {
+    font-weight: bold;
+  }
+</style>

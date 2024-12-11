@@ -12,12 +12,13 @@
 -->
 
 <template>
-  <BkTable :data="ticketDetails.details.infos">
+  <BkTable
+    :data="ticketDetails.details.infos"
+    :show-overflow="false">
     <BkTableColumn
       fixed="left"
       :label="t('源集群')"
-      :min-width="220"
-      :show-overflow="false">
+      :min-width="250">
       <template #default="{ data }: { data: RowData }">
         {{ ticketDetails.details.clusters[data.cluster_id].immute_domain }}
       </template>

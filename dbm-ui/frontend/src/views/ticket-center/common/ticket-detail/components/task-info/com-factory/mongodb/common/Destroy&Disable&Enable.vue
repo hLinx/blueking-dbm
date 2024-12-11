@@ -51,19 +51,7 @@
       label: t('集群名称'),
       field: 'immute_domain',
       showOverflowTooltip: false,
-      render: ({ data }: { data: ClusterItem }) => (
-      <div class="cluster-name text-overflow"
-        v-overflow-tips={{
-          content: `
-            <p>${t('域名')}：${data.immute_domain}</p>
-            ${data.name && `<p>${('集群别名')}：${data.name}</p>`}
-          `,
-          allowHTML: true,
-        }}>
-        <span>{data.immute_domain}</span><br />
-        <span class="cluster-name__alias">{data.name}</span>
-      </div>
-    ),
+      render: ({ data }: { data: ClusterItem }) => data.immute_domain,
     },
     {
       label: t('集群类型'),

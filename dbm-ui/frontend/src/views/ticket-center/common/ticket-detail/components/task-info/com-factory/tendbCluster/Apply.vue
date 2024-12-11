@@ -12,90 +12,103 @@
 -->
 
 <template>
-  <strong class="ticket-details-info-title">{{ t('业务信息') }}</strong>
-  <div class="ticket-details-list">
-    <div class="ticket-details-item">
-      <span class="ticket-details-item-label">{{ t('所属业务') }}：</span>
-      <span class="ticket-details-item-value">{{ ticketDetails?.bk_biz_name || '--' }}</span>
-    </div>
-    <div class="ticket-details-item">
-      <span class="ticket-details-item-label">{{ t('业务英文名') }}：</span>
-      <span class="ticket-details-item-value">{{ ticketDetails?.db_app_abbr || '--' }}</span>
-    </div>
-    <div class="ticket-details-item">
-      <span class="ticket-details-item-label">{{ t('集群名称') }}：</span>
-      <span class="ticket-details-item-value">{{ ticketDetails?.details?.cluster_name || '--' }}</span>
-    </div>
-    <div class="ticket-details-item">
-      <span class="ticket-details-item-label">{{ t('集群别名') }}：</span>
-      <span class="ticket-details-item-value">{{ ticketDetails?.details?.cluster_alias || '--' }}</span>
-    </div>
+  <div class="ticket-details-info-title">{{ t('业务信息') }}</div>
+  <InfoList>
+    <InfoItem :label="t('所属业务：')">
+      {{ ticketDetails?.bk_biz_name || '--' }}
+    </InfoItem>
+    <InfoItem :label="t('业务英文名：')">
+      {{ ticketDetails?.db_app_abbr || '--' }}
+    </InfoItem>
+    <InfoItem :label="t('集群名称：')">
+      {{ ticketDetails.details.cluster_name || '--' }}
+    </InfoItem>
+    <InfoItem :label="t('集群别名：')">
+      {{ ticketDetails.details.cluster_alias || '--' }}
+    </InfoItem>
+  </InfoList>
+  <div
+    class="ticket-details-info-title"
+    style="margin-top: 20px">
+    {{ $t('地域要求') }}
   </div>
-  <strong class="ticket-details-info-title">{{ $t('地域要求') }}</strong>
-  <div class="ticket-details-list">
-    <div class="ticket-details-item">
-      <span class="ticket-details-item-label">{{ $t('数据库部署地域') }}：</span>
-      <span class="ticket-details-item-value">{{ cityName }}</span>
-    </div>
+  <InfoList>
+    <InfoItem :label="t('数据库部署地域：')">
+      {{ ticketDetails.details.city_name }}
+    </InfoItem>
+  </InfoList>
+  <div
+    class="ticket-details-info-title"
+    style="margin-top: 20px">
+    {{ $t('数据库部署信息') }}
   </div>
-  <strong class="ticket-details-info-title">{{ $t('数据库部署信息') }}</strong>
-  <div class="ticket-details-list">
-    <div class="ticket-details-item">
-      <span class="ticket-details-item-label">{{ $t('容灾要求') }}：</span>
-      <span class="ticket-details-item-value">{{ affinity }}</span>
-    </div>
+  <InfoList>
+    <InfoItem :label="t('容灾要求：')">
+      {{ affinity || '--' }}
+    </InfoItem>
+  </InfoList>
+  <div
+    class="ticket-details-info-title"
+    style="margin-top: 20px">
+    {{ t('部署需求') }}
   </div>
-  <strong class="ticket-details-info-title">{{ t('部署需求') }}</strong>
-  <div class="ticket-details-list">
-    <div class="ticket-details-item">
-      <span class="ticket-details-item-label">{{ t('DB模块') }}：</span>
-      <span class="ticket-details-item-value">{{ ticketDetails?.details?.db_module_name || '--' }}</span>
-    </div>
-    <div class="ticket-details-item">
-      <span class="ticket-details-item-label">{{ t('MySQL版本') }}：</span>
-      <span class="ticket-details-item-value">{{ ticketDetails?.details?.version?.db_version || '--' }}</span>
-    </div>
-    <div class="ticket-details-item">
-      <span class="ticket-details-item-label">{{ t('Spider版本') }}：</span>
-      <span class="ticket-details-item-value">{{ ticketDetails?.details?.version?.spider_version || '--' }}</span>
-    </div>
-    <div class="ticket-details-item">
-      <span class="ticket-details-item-label">{{ t('访问端口') }}：</span>
-      <span class="ticket-details-item-value">{{ ticketDetails?.details?.spider_port || '--' }}</span>
-    </div>
-    <div class="ticket-details-item">
-      <span class="ticket-details-item-label">{{ t('备注') }}：</span>
-      <span class="ticket-details-item-value">{{ ticketDetails?.remark || '--' }}</span>
-    </div>
-    <div class="ticket-details-item">
-      <span class="ticket-details-item-label">{{ t('接入层Master') }}：</span>
-      <span class="ticket-details-item-value">
-        <BkPopover
-          disable-outside-click
-          :offset="16"
-          placement="top"
-          theme="light">
-          <span
-            class="pb-2"
-            style="cursor: pointer; border-bottom: 1px dashed #979ba5">
-            {{ spiderSpec?.spec_name }}（{{ `${spiderSpec?.count} ${t('台')}` }}）
-          </span>
-          <template #content>
-            <SpecInfos :data="spiderSpec" />
+  <InfoList>
+    <InfoItem :label="t('DB模块：')">
+      {{ ticketDetails.details.db_module_name || '--' }}
+    </InfoItem>
+    <InfoItem :label="t('MySQL版本：')">
+      {{ ticketDetails.details.version.db_version || '--' }}
+    </InfoItem>
+    <InfoItem :label="t('Spider版本：')">
+      {{ ticketDetails.details.version.spider_version || '--' }}
+    </InfoItem>
+    <InfoItem :label="t('访问端口：')">
+      {{ ticketDetails.details.spider_port || '--' }}
+    </InfoItem>
+    <InfoItem :label="t('接入层Master：')">
+      <BkPopover
+        disable-outside-click
+        :offset="16"
+        placement="top"
+        theme="light">
+        <span
+          class="pb-2"
+          style="cursor: pointer; border-bottom: 1px dashed #979ba5">
+          {{ ticketDetails.details.resource_spec.spider.spec_name }}（{{
+            `${ticketDetails.details.resource_spec.spider.count} ${t('台')}`
+          }}）
+        </span>
+        <template #content>
+          <SpecInfos :data="ticketDetails.details.resource_spec.spider" />
+        </template>
+      </BkPopover>
+    </InfoItem>
+    <InfoItem
+      :label="t('集群部署方案：')"
+      style="width: 100%">
+      <BkTable :data="[ticketDetails.details.resource_spec.backend_group.spec_info]">
+        <BkTableColumn
+          field="spec_name"
+          :label="t('资源规格')">
+        </BkTableColumn>
+        <BkTableColumn
+          field="machine_pair"
+          :label="t('需机器组数')">
+        </BkTableColumn>
+        <BkTableColumn
+          field="cluster_shard_num"
+          :label="t('集群分片')">
+        </BkTableColumn>
+        <BkTableColumn
+          field="cluster_shard_num"
+          :label="t('集群QPS每秒')">
+          <template #default="{data}: {data: ClusterSpecModel}">
+            {{ data.qps.min * data.machine_pair || '--' }}
           </template>
-        </BkPopover>
-      </span>
-    </div>
-    <div class="ticket-details-item whole mt-8">
-      <span class="ticket-details-item-label">{{ t('集群部署方案') }}：</span>
-      <span class="ticket-details-item-value">
-        <DbOriginalTable
-          class="custom-edit-table"
-          :columns="columns"
-          :data="backendData" />
-      </span>
-    </div>
-  </div>
+        </BkTableColumn>
+      </BkTable>
+    </InfoItem>
+  </InfoList>
 </template>
 
 <script setup lang="tsx">
@@ -109,6 +122,7 @@
   import { TicketTypes } from '@common/const';
 
   import { useAffinity } from '../../hooks/useAffinity';
+  import InfoList, { Item as InfoItem } from '../components/info-list/Index.vue';
   import SpecInfos from '../components/SpecInfos.vue';
 
   interface Props {
@@ -127,37 +141,6 @@
 
   const cityName = ref('--');
 
-  const spiderSpec = computed(() => props.ticketDetails?.details?.resource_spec?.spider || {});
-  const backendData = computed(() => {
-    const data = props.ticketDetails?.details?.resource_spec?.backend_group?.spec_info;
-    return data ? [data] : [];
-  });
-
-  const columns = [
-    {
-      field: 'spec_name',
-      label: t('资源规格'),
-      showOverflowTooltip: true,
-    },
-    {
-      field: 'machine_pair',
-      label: t('需机器组数'),
-    },
-    {
-      field: 'cluster_shard_num',
-      label: t('集群分片'),
-    },
-    {
-      field: 'cluster_capacity',
-      label: t('集群容量G'),
-    },
-    {
-      field: 'qps',
-      label: t('集群QPS每秒'),
-      render: ({ data }: { data: ClusterSpecModel }) => data.qps.min * data.machine_pair,
-    },
-  ];
-
   useRequest(getInfrasCities, {
     onSuccess: (cityList) => {
       const cityCode = props.ticketDetails.details.city_code;
@@ -166,3 +149,8 @@
     },
   });
 </script>
+<style lang="less">
+  .ticket-details-info-title {
+    font-weight: bold;
+  }
+</style>

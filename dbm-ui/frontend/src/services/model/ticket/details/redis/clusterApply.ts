@@ -35,7 +35,7 @@ export interface ClusterApply extends DetailBase {
         machine_pair: number;
         cluster_shard_num: number;
         cluster_capacity: number;
-        qps?: {
+        qps: {
           max: number;
           min: number;
         };

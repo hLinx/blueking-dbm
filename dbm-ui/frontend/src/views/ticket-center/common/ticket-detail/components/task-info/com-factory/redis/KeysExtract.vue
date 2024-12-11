@@ -12,110 +12,64 @@
 -->
 
 <template>
-  <DbOriginalTable
-    :columns="columns"
-    :data="dataList" />
+  <BkTable :data="ticketDetails.details.rules">
+    <BkTableColumn
+      :label="t('集群')"
+      :min-width="220">
+      <template #default="{ data }: { data: IRowData }">
+        {{ ticketDetails.details.clusters[data.cluster_id]?.immute_domain }}
+      </template>
+    </BkTableColumn>
+    <BkTableColumn :label="t('架构版本')">
+      <template #default="{ data }: { data: IRowData }">
+        {{ ticketDetails.details.clusters[data.cluster_id]?.cluster_type_name }}
+      </template>
+    </BkTableColumn>
+    <BkTableColumn :label="t('包含Key')">
+      <template #default="{ data }: { data: IRowData }">
+        <span v-if="!data.white_regex">--</span>
+        <template v-else>
+          <BkTag
+            v-for="item in data.white_regex.split('\n')"
+            :key="item">
+            {{ item }}
+          </BkTag>
+        </template>
+      </template>
+    </BkTableColumn>
+    <BkTableColumn :label="t('排除Key')">
+      <template #default="{ data }: { data: IRowData }">
+        <span v-if="!data.black_regex">--</span>
+        <template v-else>
+          <BkTag
+            v-for="item in data.black_regex.split('\n')"
+            :key="item">
+            {{ item }}
+          </BkTag>
+        </template>
+      </template>
+    </BkTableColumn>
+  </BkTable>
 </template>
-
-<script setup lang="tsx">
-  import { computed } from 'vue';
+<script setup lang="ts">
   import { useI18n } from 'vue-i18n';
 
   import TicketModel, { type Redis } from '@services/model/ticket/ticket';
 
   import { TicketTypes } from '@common/const';
 
-  import { utcDisplayTime } from '@utils';
-
-  interface Props{
-    ticketDetails: TicketModel<Redis.KeysExtract>
+  interface Props {
+    ticketDetails: TicketModel<Redis.KeysExtract>;
   }
 
-  const props = defineProps<Props>();
+  defineProps<Props>();
 
   defineOptions({
     name: TicketTypes.REDIS_KEYS_EXTRACT,
-    inheritAttrs: false
-  })
+    inheritAttrs: false,
+  });
+
+  type IRowData = Props['ticketDetails']['details']['rules'][number];
 
   const { t } = useI18n();
-
-  /**
-   * redis-rules | clusters 合并参数
-   */
-  interface RedisAssign {
-    alias: string,
-    bk_biz_id: number,
-    black_regex: string,
-    cluster_id: number,
-    cluster_type: string,
-    cluster_type_name: string,
-    creator: string,
-    db_module_id: number,
-    domain: string,
-    id: number,
-    immute_domain: string,
-    major_version: string,
-    name: string,
-    path: string,
-    total_size: string,
-    updater: string,
-    white_regex: string,
-    create_at: string,
-  }
-
-  /**
-   * 提取key、删除key需求信息
-   */
-  const columns = [
-    {
-      label: t('集群名称'),
-      field: 'domain',
-      showOverflowTooltip: false,
-      render: ({ data } : { data: RedisAssign }) => (
-       <div class="cluster-name text-overflow"
-         v-overflow-tips={{
-           content: `
-             <p>${t('域名')}：${data.domain}</p>
-             ${data.name ? `<p>${('集群别名')}：${data.name}</p>` : null}
-           `,
-           allowHTML: true,
-       }}>
-         <span>{data.domain}</span><br />
-         <span class="cluster-name__alias">{data.name}</span>
-       </div>
-     ),
-    },
-    {
-      label: t('架构版本'),
-      field: 'cluster_type_name',
-      render: ({ cell }: { cell: string }) => <span>{cell || '--'}</span>,
-    },
-    {
-      label: t('包含Key'),
-      field: 'white_regex',
-      render: ({ cell }: {cell: string}) => {
-        if (cell.length > 0) {
-          return cell.split('\n').filter(item => item).map((key, index) => <bk-tag key={index}>{key}</bk-tag>);
-        }
-        return <span>--</span>;
-      },
-    },
-    {
-      label: t('排除Key'),
-      field: 'black_regex',
-      render: ({ cell }: {cell: string}) => {
-        if (cell.length > 0) {
-          return cell.split('\n').filter(item => item).map((key, index) => <bk-tag key={index}>{key}</bk-tag>);
-        }
-        return <span>--</span>;
-      },
-    },
-  ];
-  const dataList = computed(() => {
-    const rules = props.ticketDetails?.details?.rules || [];
-    const clusters = props.ticketDetails?.details?.clusters || {};
-    const createAt = props.ticketDetails?.create_at;
-    return rules.map(item => Object.assign({ create_at: utcDisplayTime(createAt) }, item, clusters[item.cluster_id]));
-  });
 </script>

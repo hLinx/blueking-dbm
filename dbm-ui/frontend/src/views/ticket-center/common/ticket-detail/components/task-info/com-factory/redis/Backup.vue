@@ -16,8 +16,8 @@
     :data="ticketDetails.details.rules"
     show-overflow-tooltip>
     <BkTableColumn
-      :label="t('源集群')"
-      :min-width="180">
+      :label="t('集群')"
+      :min-width="220">
       <template #default="{ data }: { data: RowData }">
         {{ ticketDetails.details.clusters[data.cluster_id].immute_domain }}
       </template>
