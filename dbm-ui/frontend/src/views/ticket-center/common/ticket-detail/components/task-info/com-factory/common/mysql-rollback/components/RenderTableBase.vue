@@ -15,13 +15,17 @@
   <BkTable
     :data="ticketDetails.details.infos"
     show-overflow-tooltip>
-    <BkTableColumn :label="t('集群')">
+    <BkTableColumn
+      :label="t('集群')"
+      :min-width="220">
       <template #default="{ data }: { data: RowData }">
         {{ ticketDetails.details.clusters[data.cluster_id].immute_domain }}
       </template>
     </BkTableColumn>
     <slot />
-    <BkTableColumn :label="t('备份源')">
+    <BkTableColumn
+      :label="t('备份源')"
+      :min-width="150">
       <template #default="{ data }: { data: RowData }">
         {{ backupSourceMap[data.backup_source as keyof typeof backupSourceMap] }}
       </template>
@@ -44,6 +48,7 @@
             :key="item">
             {{ item }}
           </BkTag>
+          <span v-if="data.databases.length < 1">--</span>
         </template>
       </BkTableColumn>
       <BkTableColumn :label="t('忽略DB名')">
@@ -53,6 +58,7 @@
             :key="item">
             {{ item }}
           </BkTag>
+          <span v-if="data.databases_ignore.length < 1">--</span>
         </template>
       </BkTableColumn>
       <BkTableColumn :label="t('回档表名')">
@@ -62,6 +68,7 @@
             :key="item">
             {{ item }}
           </BkTag>
+          <span v-if="data.tables.length < 1">--</span>
         </template>
       </BkTableColumn>
       <BkTableColumn :label="t('忽略表名')">
@@ -71,6 +78,7 @@
             :key="item">
             {{ item }}
           </BkTag>
+          <span v-if="data.tables_ignore.length < 1">--</span>
         </template>
       </BkTableColumn>
     </template>

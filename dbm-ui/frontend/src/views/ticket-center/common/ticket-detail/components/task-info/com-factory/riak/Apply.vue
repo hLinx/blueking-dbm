@@ -59,10 +59,6 @@
       <span class="ticket-details-item-label">{{ t('服务器选择方式') }}：</span>
       <span class="ticket-details-item-value">{{ isFromResourcePool ? t('从资源池匹配') : t('手动选择') }} </span>
     </div>
-    <div class="ticket-details-item">
-      <span class="ticket-details-item-label">{{ t('备注') }}：</span>
-      <span class="ticket-details-item-value">{{ ticketDetails?.remark || '--' }}</span>
-    </div>
     <template v-if="isFromResourcePool">
       <div class="ticket-details-item">
         <span class="ticket-details-item-label">{{ t('资源规格') }}：</span>

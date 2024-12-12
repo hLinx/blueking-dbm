@@ -119,10 +119,6 @@
           label: t('http端口'),
           key: 'details.http_port',
         },
-        {
-          label: t('备注'),
-          key: 'remark',
-        },
       ],
     },
   ];

@@ -53,7 +53,9 @@
           :columns="getTargetColunms(data)" />
       </template>
     </BkTableColumn>
-    <BkTableColumn :label="t('切换模式')">
+    <BkTableColumn
+      :label="t('切换模式')"
+      :min-width="120">
       <template #default="{ data }: { data: RowData }">
         {{ data.online_switch_type === 'user_confirm' ? t('需人工确认') : t('无需确认') }}
       </template>
@@ -176,55 +178,15 @@
     },
     {
       title: t('机器组数'),
-      render: () => {
-        if (_.isEmpty(data.display_info?.machine_pair_cnt)) {
-          return '--'
-        }
-        return (
-          <>
-            <span>{data.group_num}</span>
-            <ValueDiff
-              currentValue={data.display_info.machine_pair_cnt}
-              show-rate={false}
-              targetValue={data.group_num} />
-          </>
-        )
-      }
+      render: () => data.group_num
     },
     {
       title: t('机器数量'),
-      render: () => {
-        if (_.isEmpty(data.display_info?.machine_pair_cnt)) {
-          return '--'
-        }
-        const targetValue = data.group_num * 2
-        return (
-          <>
-            <span>{targetValue}</span>
-            <ValueDiff
-              currentValue={data.display_info.machine_pair_cnt * 2}
-              show-rate={false}
-              targetValue={targetValue} />
-          </>
-        )
-      }
+      render: () => data.group_num * 2
     },
     {
       title: t('分片数'),
-      render: () => {
-        if (_.isEmpty(data.display_info?.cluster_shard_num)) {
-          return '--'
-        }
-        return (
-          <>
-            <span>{data.shard_num}</span>
-            <ValueDiff
-              currentValue={data.display_info.cluster_shard_num}
-              show-rate={false}
-              targetValue={data.shard_num} />
-          </>
-        )
-      }
+      render: () => data.shard_num
     },
     {
       title: t('变更方式'),

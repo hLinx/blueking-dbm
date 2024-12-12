@@ -190,12 +190,9 @@
           :label="t('当前处理人')"
           width="250">
           <template #default="{ data }: { data: IRowData }">
-            <BkTag
-              v-for="(item, index) in data.todo_operators"
-              :key="index">
-              {{ item }}
-            </BkTag>
-            <span v-if="data.todo_operators.length < 1">--</span>
+            <TagBlock
+              copyenable
+              :data="data.todo_operators" />
           </template>
         </BkTableColumn>
         <BkTableColumn
@@ -235,6 +232,7 @@
   import { useEventBus, useStretchLayout } from '@hooks';
 
   import EmptyStatus from '@components/empty-status/EmptyStatus.vue';
+  import TagBlock from '@components/tag-block/Index.vue';
   import TicketStatusTag from '@components/ticket-status-tag/Index.vue';
 
   import { getOffset } from '@utils';

@@ -156,10 +156,6 @@
           key: 'details.oplog_percent',
         },
         {
-          label: t('备注'),
-          key: 'remark',
-        },
-        {
           label: t('集群设置'),
           isTable: true,
           render: () => (

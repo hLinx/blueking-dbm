@@ -24,9 +24,7 @@
     "@blueking/login-modal": "^1.0.5",
     "@blueking/notice-component": "2.0.5",
     "@blueking/sub-saas": "0.0.0-beta.6",
-    "@blueking/table": "^0.0.1-beta.19",
-    "@blueking/vxe-table": "^4.8.0-beta.7.8",
-    "@icon-cool/bk-icon-bk-biz-components": "0.0.4",
+    "@blueking/table": "^0.0.1-beta.20",
     "@vueuse/core": "^12.0.0",
     "axios": "^1.7.9",
     "bkui-vue": "2.0.1-beta.78",
@@ -56,7 +54,6 @@
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^19.6.0",
-    "@jridgewell/gen-mapping":"0.3.5",
     "@trivago/prettier-plugin-sort-imports": "^5.1.0",
     "@tsconfig/node20": "20.1.4",
     "@types/lodash": "^4.17.13",
@@ -110,9 +107,6 @@
       "eslint --fix",
       "prettier --write"
     ]
-  },
-  "overrides":{
-    "@jridgewell/gen-mapping":"0.3.5"
   },
   "engines": {
     "node": ">=16.0.1"

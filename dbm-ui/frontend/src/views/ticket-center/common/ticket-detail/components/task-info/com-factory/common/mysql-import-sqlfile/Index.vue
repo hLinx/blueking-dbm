@@ -36,9 +36,7 @@
     <InfoItem
       :label="t('目标集群:')"
       style="flex: 1 0 100%">
-      <BkTable
-        :data="targetClusterData"
-        :pagination="targetClusterPagination.count > 10 ? targetClusterPagination : undefined">
+      <BkTable :data="targetClusterData">
         <BkTableColumn :label="t('集群')">
           <template #default="{ data }: { data: TargerCluster }">
             {{ ticketDetails.details.clusters[data.id].immute_domain }}
@@ -110,7 +108,7 @@
     v-if="currentExecuteObject"
     v-model:is-show="isShowSqlfile"
     :execute-object="currentExecuteObject"
-    :path="ticketDetails.ticket_type === TicketTypes.MYSQL_FORCE_IMPORT_SQLFILE ? '' : ticketDetails.details.path"
+    :path="ticketDetails.details.path"
     :select-file-name="selectFileName"
     :whole-file-list="uploadFileList" />
 </template>
@@ -119,9 +117,7 @@
   import _ from 'lodash';
   import { useI18n } from 'vue-i18n';
 
-  import TicketModel, { type Mysql } from '@services/model/ticket/ticket';
-
-  import { TicketTypes } from '@common/const';
+  import TicketModel, { type Sqlserver } from '@services/model/ticket/ticket';
 
   import RenderClusterStatus from '@components/cluster-status/Index.vue';
 
@@ -132,7 +128,7 @@
   import RenderSqlfile from './components/render-sqlfile/Index.vue';
 
   interface Props {
-    ticketDetails: TicketModel<Mysql.ImportSqlFile>;
+    ticketDetails: TicketModel<Sqlserver.ImportSqlFile>;
   }
 
   type TargerCluster = Record<'id', number>;
@@ -141,12 +137,6 @@
   const props = defineProps<Props>();
 
   const { t } = useI18n();
-
-  const targetClusterPagination = reactive({
-    count: props.ticketDetails.details.cluster_ids.length || 0,
-    limit: 10,
-    current: 1,
-  });
 
   const selectFileName = ref('');
   const currentExecuteObject = ref<Props['ticketDetails']['details']['execute_objects'][number]>();

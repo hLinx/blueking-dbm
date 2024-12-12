@@ -59,5 +59,14 @@
 
   const { t } = useI18n();
 
-  const statusText = computed(() => (props.data.summary.status === 'TERMINATED' ? t('已关单') : t('已拒绝')));
+  const statusText = computed(() => {
+    if (props.data.summary.status === 'REVOKED') {
+      return t('已撤销');
+    }
+    if (props.data.summary.status === 'FINISHED') {
+      return t('已拒绝');
+    }
+
+    return t('已关单');
+  });
 </script>

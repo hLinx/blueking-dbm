@@ -13,32 +13,18 @@
         <span>{{ t('变更的 DB:') }}</span>
         <span class="ml-4">
           <BkTag
-            v-for="item in executeObject.dbnames.slice(0, 3)"
+            v-for="item in executeObject.dbnames"
             :key="item">
             {{ item }}
-          </BkTag>
-          <BkTag
-            v-if="executeObject.dbnames.length > 3"
-            v-bk-tooltips="{
-              content: executeObject.dbnames.join('\n'),
-            }">
-            ...
           </BkTag>
           <template v-if="executeObject.dbnames.length < 1">--</template>
         </span>
         <span class="ml-25">{{ t('忽略的 DB:') }}</span>
         <span class="ml-4">
           <BkTag
-            v-for="item in executeObject.ignore_dbnames.slice(0, 3)"
+            v-for="item in executeObject.ignore_dbnames"
             :key="item">
             {{ item }}
-          </BkTag>
-          <BkTag
-            v-if="executeObject.ignore_dbnames.length > 3"
-            v-bk-tooltips="{
-              content: executeObject.ignore_dbnames.join('\n'),
-            }">
-            ...
           </BkTag>
           <template v-if="executeObject.ignore_dbnames.length < 1">--</template>
         </span>
@@ -115,15 +101,20 @@
     },
   );
 
-  watch(isShow, () => {
-    if (isShow.value) {
-      localSelectFileName.value = props.selectFileName;
-    }
-  });
-
-  if (props.wholeFileList.length > 0) {
-    runBatchFetchFile();
-  }
+  watch(
+    () => isShow,
+    () => {
+      if (isShow.value) {
+        localSelectFileName.value = props.selectFileName;
+        if (props.wholeFileList.length > 0) {
+          runBatchFetchFile();
+        }
+      }
+    },
+    {
+      immediate: true,
+    },
+  );
 
   const handleClose = () => {
     isShow.value = false;

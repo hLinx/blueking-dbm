@@ -49,6 +49,7 @@
   const { t } = useI18n();
 
   const isTaskInfoCardCollapse = useStorage('ticketTaskInfo', false);
+  console.log('taskinof');
 </script>
 
 <style lang="less">

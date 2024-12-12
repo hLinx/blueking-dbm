@@ -235,10 +235,7 @@
 
       .ticket-info-more {
         display: flex;
-
-        & ~ .ticket-info-more {
-          margin-top: 8px;
-        }
+        margin-top: 8px;
 
         .ticket-info-label {
           flex-shrink: 0;

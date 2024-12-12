@@ -123,14 +123,6 @@
         {{ security }}
       </span>
     </div>
-    <div class="ticket-details-item">
-      <span class="ticket-details-item-label">{{ $t('备注') }}：</span>
-      <span
-        v-overflow-tips
-        class="ticket-details-item-value">
-        {{ ticketDetails?.remark || '--' }}
-      </span>
-    </div>
   </div>
   <HostPreview
     v-model:is-show="previewState.isShow"

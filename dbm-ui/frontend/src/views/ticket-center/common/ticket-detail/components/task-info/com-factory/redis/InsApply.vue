@@ -168,10 +168,6 @@
           },
         },
         {
-          label: t('备注'),
-          key: 'remark',
-        },
-        {
           label: t('域名设置'),
           isTable: true,
           render: () => (

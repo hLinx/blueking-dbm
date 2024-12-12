@@ -103,10 +103,6 @@
           label: t('服务器选择'),
           render: () => isFromResourcePool ? t('自动从资源池匹配') : t('业务空闲机')
         },
-        {
-          label: t('备注'),
-          key: 'remark',
-        },
       ],
     },
   ];

@@ -33,7 +33,7 @@
     </BkTableColumn>
     <BkTableColumn :label="t('扩容数量（台）')">
       <template #default="{data}: {data: IRowData}">
-        {{ data.target_proxy_count }}
+        {{ data.resource_spec.proxy.count }}
       </template>
     </BkTableColumn>
   </BkTable>
