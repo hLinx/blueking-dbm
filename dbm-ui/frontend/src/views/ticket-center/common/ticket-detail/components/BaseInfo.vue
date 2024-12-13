@@ -1,6 +1,6 @@
 <template>
   <DbCard
-    v-model:collapse="isBaseinfoCardCollapse"
+    :collapse="isBaseinfoCardCollapse"
     mode="collapse"
     :title="t('基本信息')">
     <table class="ticket-base-info">
@@ -36,6 +36,7 @@
 </template>
 <script setup lang="ts">
   import { useI18n } from 'vue-i18n';
+  import { useRoute } from 'vue-router';
 
   import TicketModel from '@services/model/ticket/ticket';
 
@@ -44,8 +45,6 @@
 
   import { utcDisplayTime, utcTimeToSeconds } from '@utils';
 
-  import { useStorage } from '@vueuse/core';
-
   interface Props {
     ticketData: TicketModel;
   }
@@ -53,8 +52,9 @@
   defineProps<Props>();
 
   const { t } = useI18n();
+  const route = useRoute();
 
-  const isBaseinfoCardCollapse = useStorage('ticketBaseinfo', false);
+  const isBaseinfoCardCollapse = route.name === 'ticketDetail';
 </script>
 <style lang="less">
   .ticket-base-info {

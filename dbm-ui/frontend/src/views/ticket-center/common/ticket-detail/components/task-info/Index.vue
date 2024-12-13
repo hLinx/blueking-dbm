@@ -38,7 +38,7 @@
   import ComFactory from './com-factory/Index.vue';
 
   interface Props {
-    data: TicketModel<unknown>;
+    data: TicketModel;
   }
 
   defineProps<Props>();
@@ -46,10 +46,10 @@
   defineOptions({
     name: 'TicketTaskInfo',
   });
+
   const { t } = useI18n();
 
   const isTaskInfoCardCollapse = useStorage('ticketTaskInfo', false);
-  console.log('taskinof');
 </script>
 
 <style lang="less">
