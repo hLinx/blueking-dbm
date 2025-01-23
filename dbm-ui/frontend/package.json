@@ -18,8 +18,10 @@
     "prettier": "prettier --write ./src"
   },
   "dependencies": {
-    "@blueking/app-select": "0.0.1-beta.18",
-    "@blueking/bk-trace-core": "0.0.2",
+    "@antv/g6": "^5.0.46",
+    "@antv/x6": "^2.18.1",
+    "@blueking/app-select": "0.0.1-beta.12",
+    "@blueking/bk-trace-core": "^0.0.2",
     "@blueking/bk-weweb": "0.0.26",
     "@blueking/bkflow.js": "0.1.11",
     "@blueking/date-picker": "1.0.1",
@@ -30,8 +32,8 @@
     "@blueking/table": "^0.0.1-beta.39",
     "@icon-cool/bk-icon-bk-biz-components": "^0.0.4",
     "@vueuse/core": "^13.0.0",
-    "axios": "^1.8.4",
     "@xterm/xterm": "^5.5.0",
+    "axios": "^1.8.4",
     "bkui-vue": "2.0.2-beta.13",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",

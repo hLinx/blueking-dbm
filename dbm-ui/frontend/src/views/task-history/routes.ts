@@ -81,6 +81,15 @@ export default function getRoutes() {
             },
             component: () => import('@views/task-history/detail/Index.vue'),
           },
+          {
+            name: 'taskDetail',
+            path: 'task-detail/:rootId',
+            meta: {
+              navName: t('任务详情'),
+              fullscreen: true,
+            },
+            component: () => import('@views/task-history/task-detail/Index.vue'),
+          },
         ],
       },
     ]);

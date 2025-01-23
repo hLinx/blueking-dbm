@@ -165,6 +165,63 @@ export function getTaskflowDetails(params: { rootId: string }, payload = {} as I
   return http.get<FlowsDetail>(`${path}/${params.rootId}/`, {}, payload);
 }
 
+export interface IPipelineActivitiesEnd {
+  id: string;
+  incoming: string[];
+  name: string;
+  outgoing: string;
+  status: 'FAILED' | 'FINISHED';
+}
+export interface IPipelineActivities {
+  id: string;
+  incoming: string[];
+  name: string;
+  outgoing: string;
+  pipeline: {
+    activities: Record<string, IPipelineActivities> | Record<string, IPipelineActivitiesEnd>;
+    flows: IFlow['flows'];
+    gateways: IFlow['gateways'];
+    id: string;
+    start_event: IFlow['start_event'];
+  };
+  status: 'FAILED' | 'FINISHED';
+  type: string;
+}
+
+interface IFlow {
+  activities: Record<string, IPipelineActivities> | Record<string, IPipelineActivitiesEnd>;
+  flows: Record<
+    string,
+    {
+      id: string;
+      is_default: boolean;
+      source: string;
+      target: string;
+    }
+  >;
+  gateways: Record<
+    string,
+    {
+      id: string;
+      incoming: string[];
+      name: string;
+      outgoing: string[];
+      type: string;
+    }
+  >;
+  start_event: {
+    id: string;
+    incomming: string;
+    name: string;
+    outgoing: string;
+    type: string;
+  };
+}
+
+export function getTaskflowDetailsNew(params: { rootId: string }, payload = {} as IRequestPayload) {
+  return http.get<IFlow>(`${path}/${params.rootId}/`, {}, payload);
+}
+
 /**
  * 节点版本列表
  */
