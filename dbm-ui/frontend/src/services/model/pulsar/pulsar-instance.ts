@@ -50,6 +50,7 @@ export default class PulsarInstance {
   restart_at: string;
   role: string;
   status: string;
+  version: string;
 
   constructor(payload = {} as PulsarInstance) {
     this.bk_cloud_id = payload.bk_cloud_id;
@@ -74,6 +75,7 @@ export default class PulsarInstance {
     this.related_clusters = payload.related_clusters || [];
     this.role = payload.role;
     this.status = payload.status;
+    this.version = payload.version;
   }
 
   get operationDisabled() {

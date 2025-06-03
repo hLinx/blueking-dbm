@@ -1,6 +1,11 @@
 <template>
   <BkDropdown
-    :popover-options="{ zIndex: 1000 }"
+    :popover-options="{
+      zIndex: 1000,
+      boundary: 'body',
+      clickContentAutoHide: true,
+      renderDirective: 'show',
+    }"
     :trigger="trigger"
     @hide="handleHidePopover">
     <div

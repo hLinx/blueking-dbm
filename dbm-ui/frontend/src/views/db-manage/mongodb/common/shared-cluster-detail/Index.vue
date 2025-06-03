@@ -16,7 +16,9 @@
     v-bkloading="{ loading: isLoading }"
     class="cluster-detail-dialog-mode">
     <template v-if="data">
-      <DisplayBox :data="data">
+      <DisplayBox
+        cluster-detail-router-name="MongoDBSharedClusterDetail"
+        :data="data">
         <BkButton
           v-db-console="'mongodb.sharedClusterList.authorize'"
           class="ml-8"
@@ -33,31 +35,21 @@
           @click="handleShowAccessEntry">
           {{ t('获取访问方式') }}
         </BkButton>
-        <AuthButton
+        <AuthRouterLink
           action-id="mongodb_webconsole"
           class="ml-8"
           :disabled="data.isOffline"
           :permission="data.permission.mongodb_webconsole"
           :resource="data.id"
-          size="small"
-          @click="handleGoWebconsole">
-          Webconsole
-        </AuthButton>
-        <BkDropdown placement="bottom-start">
-          <BkButton
-            v-bk-tooltips="t('复制')"
-            class="ml-8"
-            size="small"
-            style="padding: 0 6px">
-            <DbIcon type="copy-2" />
-          </BkButton>
-          <template #content>
-            <BkDropdownItem @click="handleCopyClusterMasterDomainAndLink">
-              {{ t('集群域名 + 集群链接') }}
-            </BkDropdownItem>
-            <BkDropdownItem @click="handleCopyLink">{{ t('集群链接') }}</BkDropdownItem>
-          </template>
-        </BkDropdown>
+          target="_blank"
+          :to="{
+            name: 'MongodbWebconsole',
+            query: {
+              clusterId: props.clusterId,
+            },
+          }">
+          <BkButton size="small">Webconsole</BkButton>
+        </AuthRouterLink>
         <MoreActionExtend trigger="hover">
           <template #handler>
             <BkButton
@@ -132,22 +124,14 @@
               </BkButton>
             </OperationBtnStatusTips>
           </BkDropdownItem>
+          <BkDropdownItem>
+            <ClusterDomainDnsRelation :data="data">
+              <BkButton text>
+                {{ t('手动配置域名 DNS 记录') }}
+              </BkButton>
+            </ClusterDomainDnsRelation>
+          </BkDropdownItem>
         </MoreActionExtend>
-        <RouterLink
-          v-if="!isDetailPage"
-          style="margin-left: auto"
-          target="_blank"
-          :to="{
-            name: 'MongoDBSharedClusterDetail',
-            params: {
-              clusterId,
-            },
-          }">
-          <DbIcon
-            class="mr-4"
-            type="link" />
-          {{ t('新窗口打开') }}
-        </RouterLink>
       </DisplayBox>
       <ActionPanel
         :cluster-data="data"
@@ -155,6 +139,11 @@
         :cluster-type="ClusterTypes.MONGO_SHARED_CLUSTER">
         <template #infoContent>
           <BaseInfo :data="data" />
+        </template>
+        <template #instanceContent>
+          <InstanceList
+            :cluster-id="data.id"
+            :cluster-type="ClusterTypes.MONGO_SHARED_CLUSTER" />
         </template>
       </ActionPanel>
       <!-- 集群授权 -->
@@ -173,7 +162,7 @@
 <script setup lang="ts">
   import { useI18n } from 'vue-i18n';
   import { useRequest } from 'vue-request';
-  import { useRoute, useRouter } from 'vue-router';
+  import { useRouter } from 'vue-router';
 
   import MongodbDetailModel from '@services/model/mongodb/mongodb-detail';
   import { getMongoClusterDetails } from '@services/source/mongodb';
@@ -183,13 +172,12 @@
   import MoreActionExtend from '@components/more-action-extend/Index.vue';
 
   import ClusterAuthorize from '@views/db-manage/common/cluster-authorize/Index.vue';
-  import ActionPanel from '@views/db-manage/common/cluster-details/ActionPanel.vue';
-  import DisplayBox from '@views/db-manage/common/cluster-details/DisplayBox.vue';
+  import { ActionPanel, DisplayBox } from '@views/db-manage/common/cluster-details';
+  import ClusterDomainDnsRelation from '@views/db-manage/common/cluster-domain-dns-relation/Index.vue';
   import { useOperateClusterBasic, useSwitchClb } from '@views/db-manage/common/hooks';
   import OperationBtnStatusTips from '@views/db-manage/common/OperationBtnStatusTips.vue';
+  import InstanceList from '@views/db-manage/mongodb/common/ClusterDetailInstanceList.vue';
   import AccessEntry from '@views/db-manage/mongodb/components/AccessEntry.vue';
-
-  import { execCopy, getSelfDomain } from '@utils';
 
   import BaseInfo from './components/BaseInfo.vue';
 
@@ -203,20 +191,18 @@
   const emits = defineEmits<Emits>();
 
   const { t } = useI18n();
-  const route = useRoute();
   const router = useRouter();
-
-  const isDetailPage = 'MongoDBSharedClusterDetail' === (route.name as string);
 
   const data = ref<MongodbDetailModel>();
 
-  /** 集群授权 */
   const isAuthorizeShow = ref(false);
   const isShowAccessEntryInfo = ref(false);
 
   const clusterRoleNodeGroup = computed(() => {
     return {
-      [t('节点')]: data.value?.mongodb || [],
+      ConfigSvr: data.value?.mongo_config || [],
+      Mongos: data.value?.mongos || [],
+      ShardSvr: data.value?.mongodb || [],
     };
   });
 
@@ -270,39 +256,8 @@
     isAuthorizeShow.value = true;
   };
 
-  const handleGoWebconsole = () => {
-    const { href } = router.resolve({
-      name: 'MongodbWebconsole',
-      query: {
-        clusterId: props.clusterId,
-      },
-    });
-    window.open(href);
-  };
-
   const handleShowAccessEntry = () => {
     isShowAccessEntryInfo.value = true;
-  };
-
-  const handleCopyClusterMasterDomainAndLink = () => {
-    const { href } = router.resolve({
-      name: 'MongoDBSharedClusterDetail',
-      params: {
-        clusterId: props.clusterId,
-      },
-    });
-
-    execCopy(`${data.value?.master_domain}\n${getSelfDomain()}${href}`);
-  };
-
-  const handleCopyLink = () => {
-    const { href } = router.resolve({
-      name: 'MongoDBSharedClusterDetail',
-      params: {
-        clusterId: props.clusterId,
-      },
-    });
-    execCopy(`${getSelfDomain()}${href}`);
   };
 </script>
 

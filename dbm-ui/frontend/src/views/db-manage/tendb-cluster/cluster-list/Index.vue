@@ -184,6 +184,11 @@
                   </AuthButton>
                 </OperationBtnStatusTips>
               </div>
+              <ClusterDomainDnsRelation :data="data">
+                <BkButton text>
+                  {{ t('手动配置域名 DNS 记录') }}
+                </BkButton>
+              </ClusterDomainDnsRelation>
             </template>
           </OperationColumn>
         </template>
@@ -206,7 +211,7 @@
             :selected-list="selected" />
         </template>
         <template #role>
-          <MasterSlaveRoleColumn
+          <RoleColumn
             :cluster-type="ClusterTypes.TENDBCLUSTER"
             field="spider_master"
             :get-table-instance="getTableInstance"
@@ -223,8 +228,8 @@
                 Primary
               </BkTag>
             </template>
-          </MasterSlaveRoleColumn>
-          <MasterSlaveRoleColumn
+          </RoleColumn>
+          <RoleColumn
             :cluster-type="ClusterTypes.TENDBCLUSTER"
             field="spider_slave"
             :get-table-instance="getTableInstance"
@@ -242,7 +247,7 @@
             :search-ip="searchIp"
             :selected-list="selected"
             @go-detail="handleToDetails" />
-          <RemoteRoleColumn
+          <RoleColumn
             :cluster-type="ClusterTypes.TENDBCLUSTER"
             field="remote_db"
             :get-table-instance="getTableInstance"
@@ -250,8 +255,10 @@
             label="RemoteDB"
             :search-ip="searchIp"
             :selected-list="selected"
-            @go-detail="handleToDetails" />
-          <RemoteRoleColumn
+            @go-detail="handleToDetails">
+            <template #default="{ data }"> {{ data.ip }}:{{ data.port }}(%_{{ data.shard_id }}) </template>
+          </RoleColumn>
+          <RoleColumn
             :cluster-type="ClusterTypes.TENDBCLUSTER"
             field="remote_dr"
             :get-table-instance="getTableInstance"
@@ -259,7 +266,9 @@
             label="RemoteDR"
             :search-ip="searchIp"
             :selected-list="selected"
-            @go-detail="handleToDetails" />
+            @go-detail="handleToDetails">
+            <template #default="{ data }"> {{ data.ip }}:{{ data.port }}(%_{{ data.shard_id }}) </template>
+          </RoleColumn>
         </template>
         <template #moduleNames>
           <ModuleNameColumn :cluster-type="ClusterTypes.TENDBCLUSTER" />
@@ -313,6 +322,7 @@
 
   import ClusterAuthorize from '@views/db-manage/common/cluster-authorize/Index.vue';
   import ClusterBatchOperation from '@views/db-manage/common/cluster-batch-opration/Index.vue';
+  import ClusterDomainDnsRelation from '@views/db-manage/common/cluster-domain-dns-relation/Index.vue';
   import ClusterExportData from '@views/db-manage/common/cluster-export-data/Index.vue';
   import ClusterIpCopy from '@views/db-manage/common/cluster-ip-copy/Index.vue';
   import ClusterTable, {
@@ -330,9 +340,6 @@
   import ClusterDetail from '@views/db-manage/tendb-cluster/common/cluster-detail/Index.vue';
 
   import { getMenuListSearch, getSearchSelectorParams, messageWarn } from '@utils';
-
-  import MasterSlaveRoleColumn from './components/MasterSlaveRoleColume.vue';
-  import RemoteRoleColumn from './components/RemoteRoleColumn.vue';
 
   const route = useRoute();
   const router = useRouter();
@@ -490,7 +497,7 @@
   });
 
   watch(searchValue, () => {
-    tableRef.value!.clearSelected();
+    tableRef.value?.clearSelected();
   });
 
   const getMenuList = async (item: ISearchItem | undefined, keyword: string) => {
@@ -612,7 +619,7 @@
             ],
             is_safe: true,
           },
-          ticket_type: 'TENDBCLUSTER_SPIDER_MNT_DESTROY',
+          ticket_type: TicketTypes.TENDBCLUSTER_SPIDER_MNT_DESTROY,
         })
           .then((res) => {
             ticketMessage(res.id);
@@ -637,7 +644,7 @@
             cluster_ids: [data.id],
             is_safe: true,
           },
-          ticket_type: 'TENDBCLUSTER_SPIDER_SLAVE_DESTROY',
+          ticket_type: TicketTypes.TENDBCLUSTER_SPIDER_SLAVE_DESTROY,
         }).then((res) => {
           ticketMessage(res.id);
         }),

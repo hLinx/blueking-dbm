@@ -19,14 +19,28 @@
           <ClusterInstanceStatus
             :data="nodeItem.status"
             :show-text="false" />
-          <div class="ml-4">
-            {{ nodeItem.displayInstance || nodeItem.instance }}
+          <div
+            class="ml-4 mr-4"
+            :style="{
+              color: nodeItem.status === 'unavailable' ? '#c4c6cc' : '',
+            }">
+            <TextHighlight
+              high-light-color="#ff8204"
+              :keyword="serachInstacnce">
+              {{ nodeItem.displayInstance || nodeItem.instance }}
+            </TextHighlight>
           </div>
           <BkTag
-            v-if="(nodeItem as TendbhaModel['slaves'][number]).is_stand_by"
-            class="is-stand-by ml-4"
+            v-if="nodeItem.isStandBy"
+            class="cluster-specific-flag ml-4"
             size="small">
             Standby
+          </BkTag>
+          <BkTag
+            v-if="nodeItem.isPrimary"
+            class="cluster-specific-flag ml-4"
+            size="small">
+            Primary
           </BkTag>
           <BkTag
             v-if="nodeItem.status === 'unavailable'"
@@ -44,21 +58,29 @@
   import _ from 'lodash';
   import { useI18n } from 'vue-i18n';
 
-  import TendbhaModel from '@services/model/mysql/tendbha';
   import type { ClusterListNode } from '@services/types';
+
+  import { useUrlSearch } from '@hooks';
 
   import ClusterInstanceStatus from '@components/cluster-instance-status/Index.vue';
   import PopoverCopy from '@components/popover-copy/Index.vue';
+  import TextHighlight from '@components/text-highlight/Index.vue';
 
   import { execCopy, messageWarn } from '@utils';
 
   interface Props {
-    clusterRoleNodeGroup: Record<string, ({ displayInstance?: string } & ClusterListNode)[]>;
+    clusterRoleNodeGroup: Record<
+      string,
+      ({ displayInstance?: string; isPrimary?: boolean; isStandBy?: boolean } & ClusterListNode)[]
+    >;
   }
 
   defineProps<Props>();
 
   const { t } = useI18n();
+  const { getSearchParams } = useUrlSearch();
+
+  const serachInstacnce = getSearchParams().instance || '';
 
   const handleCopyHost = (nodeList: ClusterListNode[]) => {
     const ipList = _.uniq(nodeList.map((item) => item.ip));
@@ -131,11 +153,6 @@
           visibility: hidden;
         }
       }
-    }
-
-    .is-stand-by {
-      color: #531dab !important;
-      background: #f9f0ff !important;
     }
   }
 </style>

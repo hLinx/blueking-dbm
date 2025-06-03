@@ -16,7 +16,9 @@
     v-bkloading="{ loading: isLoading }"
     class="cluster-detail-dialog-mode">
     <template v-if="data">
-      <DisplayBox :data="data">
+      <DisplayBox
+        cluster-detail-router-name="riakDetail"
+        :data="data">
         <OperationBtnStatusTips
           v-db-console="'riak.clusterManage.addNodes'"
           :data="data">
@@ -59,21 +61,6 @@
             {{ t('禁用') }}
           </AuthButton>
         </OperationBtnStatusTips>
-        <BkDropdown placement="bottom-start">
-          <BkButton
-            v-bk-tooltips="t('复制')"
-            class="ml-8"
-            size="small"
-            style="padding: 0 6px">
-            <DbIcon type="copy-2" />
-          </BkButton>
-          <template #content>
-            <BkDropdownItem @click="handleCopyClusterMasterDomainAndLink">
-              {{ t('集群域名 + 集群链接') }}
-            </BkDropdownItem>
-            <BkDropdownItem @click="handleCopyLink">{{ t('集群链接') }}</BkDropdownItem>
-          </template>
-        </BkDropdown>
         <MoreActionExtend trigger="hover">
           <template #handler>
             <BkButton
@@ -114,22 +101,14 @@
               </AuthButton>
             </OperationBtnStatusTips>
           </BkDropdownItem>
+          <BkDropdownItem>
+            <ClusterDomainDnsRelation :data="data">
+              <BkButton text>
+                {{ t('手动配置域名 DNS 记录') }}
+              </BkButton>
+            </ClusterDomainDnsRelation>
+          </BkDropdownItem>
         </MoreActionExtend>
-        <RouterLink
-          v-if="!isDetailPage"
-          style="margin-left: auto"
-          target="_blank"
-          :to="{
-            name: 'riakDetail',
-            params: {
-              clusterId,
-            },
-          }">
-          <DbIcon
-            class="mr-4"
-            type="link" />
-          {{ t('新窗口打开') }}
-        </RouterLink>
       </DisplayBox>
       <ActionPanel
         :cluster-data="data"
@@ -162,7 +141,6 @@
 <script setup lang="ts">
   import { useI18n } from 'vue-i18n';
   import { useRequest } from 'vue-request';
-  import { useRoute, useRouter } from 'vue-router';
 
   import RiakModel from '@services/model/riak/riak';
   import { getRiakDetail } from '@services/source/riak';
@@ -171,14 +149,12 @@
 
   import MoreActionExtend from '@components/more-action-extend/Index.vue';
 
-  import ActionPanel from '@views/db-manage/common/cluster-details/ActionPanel.vue';
-  import DisplayBox from '@views/db-manage/common/cluster-details/DisplayBox.vue';
+  import { ActionPanel, DisplayBox } from '@views/db-manage/common/cluster-details';
+  import ClusterDomainDnsRelation from '@views/db-manage/common/cluster-domain-dns-relation/Index.vue';
   import { useOperateClusterBasic } from '@views/db-manage/common/hooks';
   import OperationBtnStatusTips from '@views/db-manage/common/OperationBtnStatusTips.vue';
   import AddNodes from '@views/db-manage/riak/common/AddNodes.vue';
   import DeleteNodes from '@views/db-manage/riak/common/DeleteNodes.vue';
-
-  import { execCopy, getSelfDomain } from '@utils';
 
   import BaseInfo from './components/BaseInfo.vue';
 
@@ -192,10 +168,6 @@
   const emits = defineEmits<Emits>();
 
   const { t } = useI18n();
-  const route = useRoute();
-  const router = useRouter();
-
-  const isDetailPage = 'riakDetail' === (route.name as string);
 
   const data = ref<RiakModel>();
   const isShowAddNode = ref(false);
@@ -244,27 +216,6 @@
 
   const handleDeleteNodes = () => {
     isShowDeleteNode.value = true;
-  };
-
-  const handleCopyClusterMasterDomainAndLink = () => {
-    const { href } = router.resolve({
-      name: 'riakDetail',
-      params: {
-        clusterId: props.clusterId,
-      },
-    });
-
-    execCopy(`${data.value?.cluster_name}\n${getSelfDomain()}${href}`);
-  };
-
-  const handleCopyLink = () => {
-    const { href } = router.resolve({
-      name: 'riakDetail',
-      params: {
-        clusterId: props.clusterId,
-      },
-    });
-    execCopy(`${getSelfDomain()}${href}`);
   };
 </script>
 

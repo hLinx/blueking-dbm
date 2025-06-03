@@ -16,7 +16,9 @@
     v-bkloading="{ loading: isLoading }"
     class="cluster-detail-dialog-mode">
     <template v-if="data">
-      <DisplayBox :data="data">
+      <DisplayBox
+        cluster-detail-router-name="tendbsingleDetail"
+        :data="data">
         <BkButton
           v-db-console="'mysql.singleClusterList.authorize'"
           class="ml-8"
@@ -25,17 +27,22 @@
           @click="handleShowAuthorize">
           {{ t('授权') }}
         </BkButton>
-        <AuthButton
+        <AuthRouterLink
           v-db-console="'mysql.haClusterList.webconsole'"
           action-id="mysql_webconsole"
           class="ml-8"
           :disabled="data.operationDisabled"
           :permission="data.permission.mysql_webconsole"
           :resource="data.id"
-          size="small"
-          @click="handleGoWebconsole">
-          Webconsole
-        </AuthButton>
+          target="_blank"
+          :to="{
+            name: 'MySQLWebconsole',
+            query: {
+              clusterId: props.clusterId,
+            },
+          }">
+          <BkButton size="small">Webconsole</BkButton>
+        </AuthRouterLink>
         <AuthButton
           v-db-console="'mysql.singleClusterList.exportData'"
           action-id="mysql_dump_data"
@@ -47,21 +54,6 @@
           @click="handleShowDataExportSlider">
           {{ t('导出数据') }}
         </AuthButton>
-        <BkDropdown placement="bottom-start">
-          <BkButton
-            v-bk-tooltips="t('复制')"
-            class="ml-8"
-            size="small"
-            style="padding: 0 6px">
-            <DbIcon type="copy-2" />
-          </BkButton>
-          <template #content>
-            <BkDropdownItem @click="handleCopyClusterMasterDomainAndLink">
-              {{ t('集群域名 + 集群链接') }}
-            </BkDropdownItem>
-            <BkDropdownItem @click="handleCopyLink">{{ t('集群链接') }}</BkDropdownItem>
-          </template>
-        </BkDropdown>
         <MoreActionExtend
           v-db-console="'mysql.singleClusterList.moreOperation'"
           trigger="hover">
@@ -121,22 +113,14 @@
               </AuthButton>
             </OperationBtnStatusTips>
           </BkDropdownItem>
+          <BkDropdownItem>
+            <ClusterDomainDnsRelation :data="data">
+              <BkButton text>
+                {{ t('手动配置域名 DNS 记录') }}
+              </BkButton>
+            </ClusterDomainDnsRelation>
+          </BkDropdownItem>
         </MoreActionExtend>
-        <RouterLink
-          v-if="!isDetailPage"
-          style="margin-left: auto"
-          target="_blank"
-          :to="{
-            name: 'tendbsingleDetail',
-            params: {
-              clusterId,
-            },
-          }">
-          <DbIcon
-            class="mr-4"
-            type="link" />
-          {{ t('新窗口打开') }}
-        </RouterLink>
       </DisplayBox>
       <ActionPanel
         :cluster-data="data"
@@ -162,7 +146,6 @@
 <script setup lang="ts">
   import { useI18n } from 'vue-i18n';
   import { useRequest } from 'vue-request';
-  import { useRoute, useRouter } from 'vue-router';
 
   import TendbsingleModel from '@services/model/mysql/tendbsingle';
   import { getTendbsingleDetail } from '@services/source/tendbsingle';
@@ -172,13 +155,11 @@
   import MoreActionExtend from '@components/more-action-extend/Index.vue';
 
   import ClusterAuthorize from '@views/db-manage/common/cluster-authorize/Index.vue';
-  import ActionPanel from '@views/db-manage/common/cluster-details/ActionPanel.vue';
-  import DisplayBox from '@views/db-manage/common/cluster-details/DisplayBox.vue';
+  import { ActionPanel, DisplayBox } from '@views/db-manage/common/cluster-details';
+  import ClusterDomainDnsRelation from '@views/db-manage/common/cluster-domain-dns-relation/Index.vue';
   import ClusterExportData from '@views/db-manage/common/cluster-export-data/Index.vue';
   import { useOperateClusterBasic } from '@views/db-manage/common/hooks';
   import OperationBtnStatusTips from '@views/db-manage/common/OperationBtnStatusTips.vue';
-
-  import { execCopy, getSelfDomain } from '@utils';
 
   import BaseInfo from './components/BaseInfo.vue';
 
@@ -192,10 +173,6 @@
   const emits = defineEmits<Emits>();
 
   const { t } = useI18n();
-  const route = useRoute();
-  const router = useRouter();
-
-  const isDetailPage = 'tendbsingleDetail' === (route.name as string);
 
   const data = ref<TendbsingleModel>();
 
@@ -211,7 +188,7 @@
 
   const { loading: isLoading, run: fetchClusterDetail } = useRequest(getTendbsingleDetail, {
     manual: true,
-    onSuccess(result: TendbsingleModel) {
+    onSuccess(result) {
       data.value = result;
     },
   });
@@ -247,39 +224,8 @@
     isAuthorizeShow.value = true;
   };
 
-  const handleGoWebconsole = () => {
-    const { href } = router.resolve({
-      name: 'MySQLWebconsole',
-      query: {
-        clusterId: props.clusterId,
-      },
-    });
-    window.open(href);
-  };
-
   const handleShowDataExportSlider = () => {
     isShowDataExport.value = true;
-  };
-
-  const handleCopyClusterMasterDomainAndLink = () => {
-    const { href } = router.resolve({
-      name: 'tendbsingleDetail',
-      params: {
-        clusterId: props.clusterId,
-      },
-    });
-
-    execCopy(`${data.value?.cluster_name}\n${getSelfDomain()}${href}`);
-  };
-
-  const handleCopyLink = () => {
-    const { href } = router.resolve({
-      name: 'tendbsingleDetail',
-      params: {
-        clusterId: props.clusterId,
-      },
-    });
-    execCopy(`${getSelfDomain()}${href}`);
   };
 </script>
 

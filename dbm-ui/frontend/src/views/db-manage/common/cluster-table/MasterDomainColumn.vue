@@ -26,76 +26,32 @@
       </RenderHeadCopy>
     </template>
     <template #default="{ data }: { data: IRowData }">
-      <div @mouseenter="handleToolsShow">
-        <TextOverflowLayout>
-          <AuthButton
-            :action-id="viewActionId"
-            :permission="Boolean(_.get(data.permission, viewActionId))"
-            :resource="data.id"
-            text
-            theme="primary"
-            @click="(event: MouseEvent) => handleToDetails(data.id, event)">
-            {{ data.masterDomainDisplayName }}
-          </AuthButton>
-          <template #append>
-            <slot
-              name="append"
-              v-bind="{ data: data }" />
-            <RenderOperationTag
-              v-for="(item, index) in data.operationTagTips"
-              :key="index"
-              class="cluster-tag ml-4"
-              :data="item" />
-            <BkTag
-              v-if="data.isOffline && !data.isStarting"
-              class="ml-4"
-              size="small">
-              {{ t('已禁用') }}
-            </BkTag>
-            <BkTag
-              v-if="data.isNew"
-              class="ml-4"
-              size="small"
-              theme="success">
-              NEW
-            </BkTag>
-            <template v-if="isToolsShow">
-              <PopoverCopy>
-                <div @click="handleCopy(data.masterDomain)">{{ t('复制域名') }}</div>
-                <div @click="handleCopy(data.masterDomainDisplayName)">{{ t('复制域名:端口') }}</div>
-              </PopoverCopy>
-              <span v-db-console="accessEntryDbConsole">
-                <EditEntryConfig
-                  :id="data.id"
-                  :biz-id="data.bk_biz_id"
-                  :permission="Boolean(data.permission.access_entry_edit)"
-                  :resource="dbType || clusterTypeInfos[clusterType].dbType"
-                  @success="handleRefresh" />
-              </span>
-            </template>
-          </template>
-        </TextOverflowLayout>
-      </div>
+      <MasterDomainCell
+        :cluster-type="clusterType"
+        :data="data"
+        :db-type="dbType"
+        @go-detail="handleToDetails"
+        @refresh="handleRefresh">
+        <template #append>
+          <slot
+            name="append"
+            v-bind="{ data }" />
+        </template>
+      </MasterDomainCell>
     </template>
   </BkTableColumn>
 </template>
 <script setup lang="ts" generic="T extends ISupportClusterType">
-  import _ from 'lodash';
   import type { VNode } from 'vue';
   import { useI18n } from 'vue-i18n';
 
-  import { clusterTypeInfos, ClusterTypes, DBTypes } from '@common/const';
+  import { DBTypes } from '@common/const';
 
   import DbTable from '@components/db-table/index.vue';
-  import PopoverCopy from '@components/popover-copy/Index.vue';
-  import TextOverflowLayout from '@components/text-overflow-layout/Index.vue';
 
-  import EditEntryConfig from '@views/db-manage/common/cluster-entry-config/Index.vue';
   import RenderHeadCopy from '@views/db-manage/common/render-head-copy/Index.vue';
-  import RenderOperationTag from '@views/db-manage/common/RenderOperationTagNew.vue';
 
-  import { execCopy } from '@utils';
-
+  import MasterDomainCell from './components/MasterDomainCell.vue';
   import useColumnCopy from './hooks/useColumnCopy';
   import type { ClusterModel, ISupportClusterType } from './types';
 
@@ -125,68 +81,14 @@
   const emits = defineEmits<Emits>();
   defineSlots<Slots<T>>();
 
-  const viewActionIdMap: Record<ISupportClusterType, string> = {
-    [ClusterTypes.DORIS]: 'doris_view',
-    [ClusterTypes.ES]: 'es_view',
-    [ClusterTypes.HDFS]: 'hdfs_view',
-    [ClusterTypes.KAFKA]: 'kafka_view',
-    [ClusterTypes.MONGO_REPLICA_SET]: 'mongodb_view',
-    [ClusterTypes.MONGO_SHARED_CLUSTER]: 'mongodb_view',
-    [ClusterTypes.PULSAR]: 'pulsar_view',
-    [ClusterTypes.REDIS]: 'redis_view',
-    [ClusterTypes.REDIS_INSTANCE]: 'redis_view',
-    [ClusterTypes.RIAK]: 'riak_view',
-    [ClusterTypes.SQLSERVER_HA]: 'sqlserver_view',
-    [ClusterTypes.SQLSERVER_SINGLE]: 'sqlserver_view',
-    [ClusterTypes.TENDBCLUSTER]: 'tendbcluster_view',
-    [ClusterTypes.TENDBHA]: 'mysql_view',
-    [ClusterTypes.TENDBSINGLE]: 'mysql_view',
-  };
-
-  const dbConsoleMap: Record<ISupportClusterType, string> = {
-    [ClusterTypes.DORIS]: 'doris.clusterManage.modifyEntryConfiguration',
-    [ClusterTypes.ES]: 'es.clusterManage.modifyEntryConfiguration',
-    [ClusterTypes.HDFS]: 'hdfs.clusterManage.modifyEntryConfiguration',
-    [ClusterTypes.KAFKA]: 'kafka.clusterManage.modifyEntryConfiguration',
-    [ClusterTypes.MONGO_REPLICA_SET]: 'mongodb.clusterManage.modifyEntryConfiguration',
-    [ClusterTypes.MONGO_SHARED_CLUSTER]: 'mongodb.clusterManage.modifyEntryConfiguration',
-    [ClusterTypes.PULSAR]: 'pulsar.clusterManage.modifyEntryConfiguration',
-    [ClusterTypes.REDIS]: 'redis.clusterManage.modifyEntryConfiguration',
-    [ClusterTypes.REDIS_INSTANCE]: 'redis.clusterManage.modifyEntryConfiguration',
-    [ClusterTypes.RIAK]: 'riak.clusterManage.modifyEntryConfiguration',
-    [ClusterTypes.SQLSERVER_HA]: 'sqlserver.haClusterList.modifyEntryConfiguration',
-    [ClusterTypes.SQLSERVER_SINGLE]: 'sqlserver.singleClusterList.modifyEntryConfiguration',
-    [ClusterTypes.TENDBCLUSTER]: 'tendbCluster.clusterManage.modifyEntryConfiguration',
-    [ClusterTypes.TENDBHA]: 'mysql.haClusterList.modifyEntryConfiguration',
-    [ClusterTypes.TENDBSINGLE]: 'mysql.singleClusterList.modifyEntryConfiguration',
-  };
-
   const { t } = useI18n();
 
   const columnMinWidth = window.innerWidth < 1366 ? 180 : 280;
 
-  const isToolsShow = ref(false);
-  const viewActionId = computed(() => viewActionIdMap[props.clusterType]);
-
-  const accessEntryDbConsole = computed(() => dbConsoleMap[props.clusterType]);
-
   const { handleCopyAll, handleCopySelected } = useColumnCopy(props);
 
-  const handleToolsShow = () => {
-    setTimeout(() => {
-      isToolsShow.value = true;
-    }, 1000);
-  };
-
-  const handleCopy = (data: string) => {
-    execCopy(data, t('复制成功，共n条', { n: 1 }));
-  };
-
   const handleToDetails = (id: number, event: MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
     emits('go-detail', id, event);
-    return false;
   };
 
   const handleRefresh = () => {
@@ -195,7 +97,8 @@
 </script>
 <style lang="less">
   .cluster-table-master-domain-column {
-    &:hover {
+    &:hover,
+    .is-hover {
       [class*='db-icon'] {
         display: inline !important;
       }

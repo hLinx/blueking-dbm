@@ -1,12 +1,12 @@
 <template>
-  <div class="big-data-cluster-detail-instance-list-box">
+  <div class="cluster-detail-instance-list-box">
     <div class="action-box mb-16">
       <BkButton
-        :disabled="isBatchRestartDisabled || isRestartActionDisabled"
-        :loading="isBatchRestartLoading"
+        :disabled="selectedList.length < 1"
+        :loading="isRestartLoading"
         style="width: 105px"
         theme="primary"
-        @click="handleRestart()">
+        @click="handleBatchRestart">
         {{ t('批量重启') }}
       </BkButton>
       <BkDropdown>
@@ -20,7 +20,7 @@
           <BkDropdownMenu>
             <BkDropdownItem>
               <BkButton
-                :disabled="selectionList.length < 1"
+                :disabled="selectedList.length < 1"
                 text
                 @click="handleCopySelectedInstance">
                 {{ t('已选实例') }}
@@ -54,7 +54,7 @@
           <BkDropdownMenu>
             <BkDropdownItem>
               <BkButton
-                :disabled="selectionList.length < 1"
+                :disabled="selectedList.length < 1"
                 text
                 @click="handleCopySelectedIp">
                 {{ t('已选 IP') }}
@@ -87,23 +87,31 @@
     <DbTable
       ref="dbTable"
       :data-source="dataSource"
-      primary-key="id"
       selectable
-      @selection="handleSelection">
+      @selection="handleSelectionChange">
       <BkTableColumn
         field="instance_address"
         fixed="left"
+        :min-width="250"
         :title="t('实例')" />
+      <BkTableColumn
+        field="instance_domain"
+        :min-width="300"
+        :title="t('所属集群')">
+        <template #default="{ data }: { data: MongodbInstanceModel }">
+          {{ data.instance_domain || '--' }}
+        </template>
+      </BkTableColumn>
       <InstanceListFieldColumn />
       <BkTableColumn
         field="action"
         fixed="right"
         :title="t('操作')">
-        <template #default="{ data }: { data: IInstanceDetail }">
+        <template #default="{ data }: { data: MongodbInstanceModel }">
           <BkButton
             text
             theme="primary"
-            @click="handleRestart(data)">
+            @click="handleRestart([data])">
             {{ t('重启') }}
           </BkButton>
         </template>
@@ -111,56 +119,33 @@
     </DbTable>
   </div>
 </template>
-<script lang="tsx">
+<script setup lang="tsx">
   import { InfoBox } from 'bkui-vue';
   import _ from 'lodash';
   import { useI18n } from 'vue-i18n';
 
-  import DorisModel from '@services/model/doris/doris';
-  import EsModel from '@services/model/es/es';
-  import HdfsModel from '@services/model/hdfs/hdfs';
-  import KafkaDetailModel from '@services/model/kafka/kafka-detail';
-  import PulsarModel from '@services/model/pulsar/pulsar';
+  import MongodbInstanceModel from '@services/model/mongodb/mongodb-instance';
   import { createTicket } from '@services/source/ticket';
 
   import { useTicketMessage } from '@hooks';
 
   import { ClusterInstStatusKeys, ClusterTypes, TicketTypes } from '@common/const';
 
+  import { InstanceListFieldColumn } from '@views/db-manage/common/cluster-details';
   import useClusterInstanceList from '@views/db-manage/hooks/useClusterInstaceList';
 
   import { execCopy, getSearchSelectorParams, messageWarn } from '@utils';
 
-  import InstanceListFieldColumn from '../InstanceListFieldColumn.vue';
-
-  interface ClusterTypeRelateClusterModel {
-    [ClusterTypes.DORIS]: DorisModel;
-    [ClusterTypes.ES]: EsModel;
-    [ClusterTypes.HDFS]: HdfsModel;
-    [ClusterTypes.KAFKA]: KafkaDetailModel;
-    [ClusterTypes.PULSAR]: PulsarModel;
+  interface Props {
+    clusterId: number;
+    clusterType: ClusterTypes.MONGO_REPLICA_SET | ClusterTypes.MONGO_SHARED_CLUSTER;
   }
 
-  const clusterTypeWithTicketTypeMap: Record<keyof ClusterTypeRelateClusterModel, TicketTypes> = {
-    [ClusterTypes.DORIS]: TicketTypes.DORIS_REBOOT,
-    [ClusterTypes.ES]: TicketTypes.ES_REBOOT,
-    [ClusterTypes.HDFS]: TicketTypes.HDFS_REBOOT,
-    [ClusterTypes.KAFKA]: TicketTypes.KAFKA_REBOOT,
-    [ClusterTypes.PULSAR]: TicketTypes.PULSAR_REBOOT,
-  };
-
-  type IInstanceDetail = ServiceReturnType<ReturnType<typeof useClusterInstanceList>>['results'][number];
-</script>
-<script setup lang="tsx" generic="T extends keyof ClusterTypeRelateClusterModel">
-  export interface Props<T extends keyof ClusterTypeRelateClusterModel> {
-    clusterData: ClusterTypeRelateClusterModel[T];
-    clusterType: T;
-  }
-
-  const props = defineProps<Props<T>>();
+  const props = defineProps<Props>();
 
   const { t } = useI18n();
   const ticketMessage = useTicketMessage();
+
   const requestHandler = useClusterInstanceList(props.clusterType);
 
   const searchSelectData = [
@@ -200,18 +185,68 @@
   const dataSource = (params: ServiceParameters<typeof requestHandler>) =>
     requestHandler({
       ...params,
-      cluster_id: props.clusterData.id,
+      cluster_id: props.clusterId,
+      cluster_type: props.clusterType,
     });
 
   const dbTable = useTemplateRef('dbTable');
+  const selectedList = shallowRef<MongodbInstanceModel[]>([]);
   const isRestartLoading = ref(false);
-  const isBatchRestartLoading = ref(false);
-  const isRestartActionDisabled = ref(false);
-  const selectionList = ref<IInstanceDetail[]>([]);
 
-  const isBatchRestartDisabled = computed(() => selectionList.value.length < 1);
+  const fetchData = () => {
+    dbTable.value?.fetchData();
+  };
 
-  const copyFieldData = (data: IInstanceDetail[], field: 'ip' | 'instance_address') => {
+  const handleRestart = (data: MongodbInstanceModel[]) => {
+    isRestartLoading.value = true;
+    InfoBox({
+      cancelText: t('取消'),
+      confirmText: t('确认'),
+      contentAlign: 'center',
+      footerAlign: 'center',
+      headerAlign: 'center',
+      infoType: 'warning',
+      onCancel: () => {
+        isRestartLoading.value = false;
+      },
+      onConfirm: () => {
+        return createTicket({
+          bk_biz_id: window.PROJECT_CONFIG.BIZ_ID,
+          details: {
+            infos: data.map((item) => ({
+              bk_host_id: item.bk_host_id,
+              cluster_id: item.cluster_id,
+              instance_id: item.id,
+              port: item.port,
+              role: item.role,
+            })),
+          },
+          ticket_type: TicketTypes.MONGODB_INSTANCE_RELOAD,
+        })
+          .then((res) => {
+            ticketMessage(res.id);
+            fetchData();
+          })
+          .finally(() => {
+            isRestartLoading.value = false;
+          });
+      },
+      subTitle: () => (
+        <div>
+          {data.map((item) => (
+            <div>{`${item.ip}:${item.port}`}</div>
+          ))}
+        </div>
+      ),
+      title: t('确认重启实例？'),
+    });
+  };
+
+  const handleBatchRestart = () => {
+    handleRestart(selectedList.value);
+  };
+
+  const copyFieldData = (data: MongodbInstanceModel[], field: 'ip' | 'instance_address') => {
     const result = data.map((item) => item[field]) || [];
 
     if (result.length < 1) {
@@ -227,13 +262,13 @@
   };
 
   const handleCopySelectedInstance = () => {
-    copyFieldData(selectionList.value, 'instance_address');
+    copyFieldData(selectedList.value, 'instance_address');
   };
 
   const handleCopyAbnormalInstance = () => {
     copyFieldData(
       _.filter(
-        dbTable.value?.getData<IInstanceDetail>() || [],
+        dbTable.value?.getData<MongodbInstanceModel>() || [],
         (item) => item.status !== ClusterInstStatusKeys.RUNNING,
       ),
       'instance_address',
@@ -241,17 +276,17 @@
   };
 
   const handleCopyAllInstance = () => {
-    copyFieldData(dbTable.value?.getData<IInstanceDetail>() || [], 'instance_address');
+    copyFieldData(dbTable.value?.getData<MongodbInstanceModel>() || [], 'instance_address');
   };
 
   const handleCopySelectedIp = () => {
-    copyFieldData(selectionList.value, 'ip');
+    copyFieldData(selectedList.value, 'ip');
   };
 
   const handleCopyAbnormalIp = () => {
     copyFieldData(
       _.filter(
-        dbTable.value?.getData<IInstanceDetail>() || [],
+        dbTable.value?.getData<MongodbInstanceModel>() || [],
         (item) => item.status !== ClusterInstStatusKeys.RUNNING,
       ),
       'ip',
@@ -259,110 +294,23 @@
   };
 
   const handleAllIp = () => {
-    copyFieldData(dbTable.value?.getData<IInstanceDetail>() || [], 'ip');
+    copyFieldData(dbTable.value?.getData<MongodbInstanceModel>() || [], 'ip');
   };
 
   const handleSearchValueChange = (payload: any) => {
     dbTable.value?.fetchData(getSearchSelectorParams(payload));
   };
 
-  const handleSelection = (_: any, selectedRows: IInstanceDetail[]) => {
-    selectionList.value = selectedRows;
-  };
-
-  const handleRestart = (data?: IInstanceDetail) => {
-    const restartInstanceList = data ? [data] : selectionList.value;
-
-    if (data) {
-      isRestartLoading.value = true;
-    } else {
-      isBatchRestartLoading.value = true;
-    }
-
-    const formatRequestData = (data: Array<IInstanceDetail>) =>
-      data.map((item) => {
-        const [ip, port] = item.instance_address.split(':');
-        return {
-          bk_cloud_id: item.bk_cloud_id,
-          bk_host_id: item.bk_host_id,
-          instance_id: item.id,
-          instance_name: item.instance_name,
-          ip,
-          port: Number(port),
-        };
-      });
-
-    InfoBox({
-      cancelText: t('取消'),
-      confirmText: t('确认重启'),
-      contentAlign: 'left',
-      extCls: 'big-data-instance-replace-model',
-      footerAlign: 'center',
-      headerAlign: 'center',
-      infoType: 'warning',
-      onCancel: () => {
-        if (data) {
-          isRestartLoading.value = false;
-        } else {
-          isBatchRestartLoading.value = false;
-        }
-      },
-      onConfirm: () => {
-        isRestartActionDisabled.value = true;
-        return createTicket({
-          bk_biz_id: window.PROJECT_CONFIG.BIZ_ID,
-          details: {
-            cluster_id: props.clusterData.id,
-            instance_list: formatRequestData(restartInstanceList),
-          },
-          ticket_type: clusterTypeWithTicketTypeMap[props.clusterType],
-        })
-          .then((data) => {
-            ticketMessage(data.id);
-            window.changeConfirm = false;
-          })
-          .finally(() => {
-            isRestartActionDisabled.value = false;
-            if (data) {
-              isRestartLoading.value = false;
-            } else {
-              isBatchRestartLoading.value = false;
-            }
-          });
-      },
-      subTitle: () => (
-        <div style='background-color: #F5F7FA; padding: 8px 16px;'>
-          <div class='tips-item'>
-            {t('实例')} :
-            <span
-              class='ml-8'
-              style='color: #313238'>
-              {restartInstanceList.map((instanceItem) => instanceItem.instance_address).join(', ')}
-            </span>
-          </div>
-          <div class='mt-4'>{t('连接将会断开，请谨慎操作！')}</div>
-        </div>
-      ),
-      title: t('确认重启该实例？'),
-    });
+  const handleSelectionChange = (_: any[], selectList: MongodbInstanceModel[]) => {
+    selectedList.value = selectList;
   };
 </script>
 <style lang="less">
-  .big-data-cluster-detail-instance-list-box {
+  .cluster-detail-instance-list-box {
     padding: 18px 0;
 
     .action-box {
       display: flex;
-    }
-  }
-
-  .big-data-instance-replace-model {
-    .bk-modal-content div {
-      font-size: 14px;
-    }
-
-    .tips-item {
-      padding: 2px 0;
     }
   }
 </style>

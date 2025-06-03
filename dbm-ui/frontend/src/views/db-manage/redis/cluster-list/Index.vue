@@ -266,6 +266,11 @@
                   </AuthButton>
                 </OperationBtnStatusTips>
               </div>
+              <ClusterDomainDnsRelation :data="data">
+                <BkButton text>
+                  {{ t('手动配置域名 DNS 记录') }}
+                </BkButton>
+              </ClusterDomainDnsRelation>
             </template>
           </OperationColumn>
         </template>
@@ -300,27 +305,40 @@
             :get-table-instance="getTableInstance"
             :is-filter="isFilter"
             label="Proxy"
+            :min-width="260"
             :search-ip="batchSearchIpInatanceList"
             :selected-list="selected"
             @go-detail="handleToDetails" />
-          <MasterSlaveRoleColumn
+          <RoleColumn
             :cluster-type="ClusterTypes.REDIS"
             field="redis_master"
             :get-table-instance="getTableInstance"
             :is-filter="isFilter"
             label="Master"
+            :min-width="260"
             :search-ip="batchSearchIpInatanceList"
             :selected-list="selected"
-            @go-detail="handleToDetails" />
-          <MasterSlaveRoleColumn
+            @go-detail="handleToDetails">
+            <template #default="{ data }">
+              {{ data.ip }}:{{ data.port }}
+              <template v-if="data.seg_range">({{ data.seg_range }})</template>
+            </template>
+          </RoleColumn>
+          <RoleColumn
             :cluster-type="ClusterTypes.REDIS"
             field="redis_slave"
             :get-table-instance="getTableInstance"
             :is-filter="isFilter"
             label="Slave"
+            :min-width="260"
             :search-ip="batchSearchIpInatanceList"
             :selected-list="selected"
-            @go-detail="handleToDetails" />
+            @go-detail="handleToDetails">
+            <template #default="{ data }">
+              {{ data.ip }}:{{ data.port }}
+              <template v-if="data.seg_range">({{ data.seg_range }})</template>
+            </template>
+          </RoleColumn>
         </template>
         <template #clusterTypeName>
           <BkTableColumn
@@ -379,6 +397,7 @@
   import TagSearch from '@components/tag-search/index.vue';
 
   import ClusterBatchOperation from '@views/db-manage/common/cluster-batch-opration/Index.vue';
+  import ClusterDomainDnsRelation from '@views/db-manage/common/cluster-domain-dns-relation/Index.vue';
   import ClusterEntryPanel from '@views/db-manage/common/cluster-entry-panel/Index.vue';
   import ClusterIpCopy from '@views/db-manage/common/cluster-ip-copy/Index.vue';
   import ClusterTable, {
@@ -394,8 +413,6 @@
   import ClusterPassword from '@views/db-manage/redis/common/cluster-oprations/ClusterPassword.vue';
 
   import { getMenuListSearch, getSearchSelectorParams } from '@utils';
-
-  import MasterSlaveRoleColumn from './components/MasterSlaveRoleColume.vue';
 
   enum ClusterNodeKeys {
     PROXY = 'proxy',

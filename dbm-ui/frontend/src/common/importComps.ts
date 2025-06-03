@@ -54,7 +54,7 @@ import { ipSelector } from '@components/vue2/ip-selector';
 
 import OperationColumn from '@views/db-manage/common/toolbox-field/column/operation-column/Index.vue';
 
-import '@blueking/tdesign-ui/vue3/index.css';
+// import '@blueking/tdesign-ui/vue3/index.css';
 import UserSelector from '@patch/user-selector/selector.vue';
 
 import('@blueking/table/vue3/vue3.css');

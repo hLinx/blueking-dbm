@@ -19,7 +19,7 @@
       </slot>
       <slot name="info">
         <BkTabPanel
-          :label="t('集群详情')"
+          :label="t('基本信息')"
           name="info">
           <slot
             v-if="activePanel === 'info' && clusterData"
@@ -30,9 +30,24 @@
           </slot>
         </BkTabPanel>
       </slot>
+      <slot name="instance">
+        <BkTabPanel
+          :label="t('实例列表')"
+          name="instance">
+          <slot
+            v-if="activePanel === 'instance'"
+            name="instanceContent">
+            <Instancelist
+              :key="clusterData.id"
+              :cluster-id="clusterData.id"
+              :cluster-role-node-group="clusterRoleNodeGroup"
+              :cluster-type="clusterType" />
+          </slot>
+        </BkTabPanel>
+      </slot>
       <slot name="host">
         <BkTabPanel
-          :label="t('主机信息')"
+          :label="t('主机列表')"
           name="host">
           <slot
             v-if="activePanel === 'host'"
@@ -44,20 +59,7 @@
           </slot>
         </BkTabPanel>
       </slot>
-      <slot name="instance">
-        <BkTabPanel
-          :label="t('集群实例')"
-          name="instance">
-          <slot
-            v-if="activePanel === 'instance'"
-            name="instanceContent">
-            <Instancelist
-              :key="clusterData.id"
-              :cluster-id="clusterData.id"
-              :cluster-type="clusterType" />
-          </slot>
-        </BkTabPanel>
-      </slot>
+
       <template v-if="monitorPanelList && monitorPanelList.urls.length > 0">
         <BkTabPanel
           v-for="monirotItem in monitorPanelList.urls"
@@ -98,7 +100,7 @@
   import SqlserverSingleModel from '@services/model/sqlserver/sqlserver-single';
   import TendbClusterModel from '@services/model/tendbcluster/tendbcluster';
 
-  interface ClusterTypeRelateClusterModel {
+  export interface ClusterTypeRelateClusterModel {
     [ClusterTypes.DORIS]: DorisModel;
     [ClusterTypes.ES]: EsModel;
     [ClusterTypes.HDFS]: HdfsModel;
@@ -204,6 +206,11 @@
       height: calc(100vh - 168px);
       padding: 0 24px;
       overflow: auto;
+    }
+
+    .cluster-specific-flag {
+      color: #531dab !important;
+      background: #f9f0ff !important;
     }
   }
 </style>

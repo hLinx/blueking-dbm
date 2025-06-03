@@ -12,8 +12,8 @@
 -->
 
 <template>
-  <div class="event-change db-scroll-y">
-    <div class="event-change__operations mb-16">
+  <div class="cluster-detail-event-change">
+    <div class="mb-16">
       <BkDatePicker
         v-model="daterange"
         append-to-body
@@ -158,9 +158,8 @@
   }
 </script>
 
-<style lang="less" scoped>
-  .event-change {
-    height: 100%;
+<style lang="less">
+  .cluster-detail-event-change {
     padding: 24px 0;
   }
 </style>

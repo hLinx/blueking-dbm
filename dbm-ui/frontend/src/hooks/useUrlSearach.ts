@@ -48,7 +48,7 @@ export const useUrlSearch = () => {
     window.history.replaceState({}, '', `?${curSearchParams.toString()}`);
   };
 
-  const replaceSearchParams = (params: Record<string, any>) => {
+  const replaceSearchParams = (params: Record<string, any>, localtion = true) => {
     const latestParams = getSearchParams();
 
     // 全部替换时忽略 _ 开头的 key, 此类可以作为页面状态存储用
@@ -59,14 +59,12 @@ export const useUrlSearch = () => {
       delete latestParams[key];
     });
 
-    window.history.replaceState(
-      {},
-      '',
-      `?${buildURLParams({
-        ...params,
-        ...latestParams,
-      })}`,
-    );
+    Object.assign(latestParams, params);
+
+    if (localtion) {
+      window.history.replaceState({}, '', `?${buildURLParams(latestParams)}`);
+    }
+    return latestParams;
   };
 
   return {

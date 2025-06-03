@@ -88,6 +88,7 @@
   }
 
   export interface Expose<C extends ISupportClusterType> {
+    clearSelected: () => void;
     fetchData: (params: Record<string, any>) => void;
     getData: <C>() => C[];
   }
@@ -138,11 +139,15 @@
     emits('refresh');
   };
 
-  const handleSelection = (_: any, list: ClusterModel<T>[]) => {
+  const handleSelection = (keyList: number[], list: ClusterModel<T>[]) => {
     selected.value = list;
+    emits('selection', keyList, list);
   };
 
   defineExpose<Expose<T>>({
+    clearSelected() {
+      tableRef.value?.clearSelected();
+    },
     fetchData(params: Record<string, any>) {
       tableRef.value?.fetchData(params);
       isFilter.value = Object.keys(params).length > 0;

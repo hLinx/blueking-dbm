@@ -124,6 +124,7 @@
   import _ from 'lodash';
   import { computed, nextTick, onMounted, reactive, type Ref, ref, shallowRef } from 'vue';
   import { useI18n } from 'vue-i18n';
+  import { useRouter } from 'vue-router';
 
   import type { IRequestPayload } from '@services/http';
   import type { ListBase } from '@services/types';
@@ -295,6 +296,7 @@
     width: 70,
   });
 
+  const router = useRouter();
   const { t } = useI18n();
   const paginationLimitCache = useStorage('table_pagination_limit', 20);
 
@@ -426,7 +428,9 @@
           }
 
           if (!props.fixedPagination && props.releateUrlQuery) {
-            replaceSearchParams(params);
+            router.replace({
+              query: replaceSearchParams(params, false),
+            });
           }
           if (!isPaginationChangeFetch) {
             isPaginationChangeFetch = false;

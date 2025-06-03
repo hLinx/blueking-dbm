@@ -35,10 +35,12 @@
       </BkButton>
       <DropdownExportExcel
         v-db-console="'mysql.haClusterList.export'"
+        class="ml-8"
         :ids="selectedIds"
         type="tendbha" />
       <ClusterIpCopy
         v-db-console="'mysql.haClusterList.batchCopy'"
+        class="ml-8"
         :selected="selected" />
       <DbSearchSelect
         :data="searchSelectData"
@@ -165,6 +167,11 @@
                   </AuthButton>
                 </OperationBtnStatusTips>
               </div>
+              <ClusterDomainDnsRelation :data="data">
+                <BkButton text>
+                  {{ t('手动配置域名 DNS 记录') }}
+                </BkButton>
+              </ClusterDomainDnsRelation>
             </template>
           </OperationColumn>
         </template>
@@ -279,6 +286,7 @@
 
   import ClusterAuthorize from '@views/db-manage/common/cluster-authorize/Index.vue';
   import ClusterBatchOperation from '@views/db-manage/common/cluster-batch-opration/Index.vue';
+  import ClusterDomainDnsRelation from '@views/db-manage/common/cluster-domain-dns-relation/Index.vue';
   import ClusterExportData from '@views/db-manage/common/cluster-export-data/Index.vue';
   import ClusterIpCopy from '@views/db-manage/common/cluster-ip-copy/Index.vue';
   import ClusterTable, {
@@ -453,7 +461,9 @@
   });
 
   watch(searchValue, () => {
-    tableRef.value!.clearSelected();
+    setTimeout(() => {
+      tableRef.value!.clearSelected();
+    });
   });
 
   const getMenuList = async (item: ISearchItem | undefined, keyword: string) => {

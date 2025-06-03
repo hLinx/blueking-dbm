@@ -61,8 +61,8 @@
 
   import TagBlock from '@components/tag-block/Index.vue';
 
+  import { SlaveDomain } from '@views/db-manage/common/cluster-details';
   import BaseInfo, { InfoItem } from '@views/db-manage/common/cluster-details/base-info/Index.vue';
-  import SlaveDomain from '@views/db-manage/common/cluster-details/SlaveDomain.vue';
   import ClusterRoleStatus from '@views/db-manage/common/cluster-role-status/Index.vue';
   import ClusterStatsCell from '@views/db-manage/common/cluster-stats-cell/Index.vue';
 

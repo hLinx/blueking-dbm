@@ -1,36 +1,77 @@
 <template>
-  <BaseRoleColumn
-    v-bind="props"
-    :key="field">
-    <template
-      v-if="slots.default"
-      #default="data">
-      <slot
-        name="default"
-        v-bind="data" />
+  <BkTableColumn
+    class-name="cluster-table-role-column"
+    :field="field"
+    :label="label"
+    :min-width="minWidth"
+    :show-overflow="false">
+    <template #header>
+      <RenderHeadCopy
+        :config="[
+          {
+            label: 'IP',
+            field: 'ip',
+          },
+          {
+            label: t('实例'),
+            field: 'instance',
+          },
+        ]"
+        :has-selected="selectedList.length > 0"
+        :is-filter="isFilter"
+        @handle-copy-all="handleHeadCopyAll"
+        @handle-copy-selected="handleHeadCopySelected">
+        {{ label }}
+      </RenderHeadCopy>
     </template>
-    <template #nodeTag="data">
-      <slot
-        name="nodeTag"
-        v-bind="data" />
+    <template #default="{ data }: { data: IRowData }">
+      <RoleCell
+        :data="getRoleInstanceList(data)"
+        @go-detail="(event: MouseEvent) => handleShowMore(data.id, event)">
+        <template
+          v-if="slots.default"
+          #default="{ data: instanceItem }">
+          <slot v-bind="{ data: instanceItem as any }" />
+        </template>
+        <template
+          v-if="slots.nodeTag"
+          #nodeTag="{ data: instanceItem }">
+          <slot
+            v-bind="{
+              data: instanceItem as any,
+            }"
+            name="nodeTag" />
+        </template>
+      </RoleCell>
     </template>
-  </BaseRoleColumn>
+  </BkTableColumn>
 </template>
 <script setup lang="ts" generic="T extends ISupportClusterType, F extends keyof ClusterModel<T>">
+  import _ from 'lodash';
+  import { useI18n } from 'vue-i18n';
+
+  import type { ClusterListNode } from '@services/types';
+
   import DbTable from '@components/db-table/index.vue';
 
-  import BaseRoleColumn from './components/base-role-column/Index.vue';
+  import RenderHeadCopy from '@views/db-manage/common/render-head-copy/Index.vue';
+
+  import { execCopy, messageWarn } from '@utils';
+
+  import RoleCell from './components/RoleCell.vue';
   import type { ClusterModel, ISupportClusterType } from './types';
 
   export interface Props<clusterType extends ISupportClusterType, F extends keyof ClusterModel<clusterType>> {
+    // eslint-disable-next-line vue/no-unused-properties
     clusterType: clusterType;
     field: F;
     getTableInstance: () => InstanceType<typeof DbTable> | undefined;
     isFilter: boolean;
     label: string;
-    searchIp?: string[];
+    minWidth?: number;
     selectedList: ClusterModel<clusterType>[];
   }
+  export type Emits = (e: 'go-detail', params: number, event: MouseEvent) => void;
 
   export type ReturnArrayElement<T> = T extends (infer U)[] ? U : T;
 
@@ -39,6 +80,80 @@
     nodeTag: (params: { data: ReturnArrayElement<ClusterModel<clusterType>[F]> }) => void;
   }
 
-  const props = defineProps<Props<T, F>>();
+  const props = withDefaults(defineProps<Props<T, F>>(), {
+    minWidth: 200,
+  });
+  const emits = defineEmits<Emits>();
   const slots = defineSlots<Slots<T, F>>();
+
+  const { t } = useI18n();
+
+  type IRowData = ClusterModel<T>;
+
+  const getRoleInstanceList = (data: IRowData) => (_.get(data, props.field) || []) as ClusterListNode[];
+
+  const getCopyList = (data: ClusterModel<T>[], field: 'ip' | 'instance') =>
+    _.uniq(
+      data.reduce(
+        (result, item) =>
+          result.concat(
+            (item[props.field as keyof typeof item] as ClusterListNode[]).map((nodeItem) => nodeItem[field]),
+          ),
+        [] as string[],
+      ),
+    );
+
+  const handleHeadCopySelected = (field: 'ip' | 'instance') => {
+    const copyList = getCopyList(props.selectedList, field);
+    if (copyList.length < 1) {
+      messageWarn(t('暂无数据可复制'));
+      return;
+    }
+    execCopy(
+      copyList.join('\n'),
+      t('复制成功，共n条', {
+        n: copyList.length,
+      }),
+    );
+  };
+
+  const handleHeadCopyAll = (field: 'ip' | 'instance') => {
+    props
+      .getTableInstance()!
+      .getAllData<ClusterModel<T>>()
+      .then((data) => {
+        if (data.length < 1) {
+          messageWarn(t('暂无数据可复制'));
+          return;
+        }
+        const copyList = getCopyList(data, field);
+        execCopy(
+          copyList.join('\n'),
+          t('复制成功，共n条', {
+            n: copyList.length,
+          }),
+        );
+      });
+  };
+
+  const handleShowMore = (id: number, event: MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    emits('go-detail', id, event);
+  };
 </script>
+<style lang="less">
+  .cluster-table-role-column {
+    &:hover {
+      [class*='db-icon'] {
+        display: inline !important;
+      }
+    }
+
+    [class*='db-icon'] {
+      display: none;
+      color: @primary-color;
+      cursor: pointer;
+    }
+  }
+</style>

@@ -3,19 +3,10 @@
     <InfoItem :label="t('集群名称')">
       {{ data.cluster_name }}
     </InfoItem>
-    <InfoItem :label="t('主访问入口')">
-      {{ data.master_domain }}
-    </InfoItem>
-    <InfoItem :label="t('从访问入口')">
-      {{ data.slave_domain }}
-    </InfoItem>
     <InfoItem :label="t('状态')">
       <ClusterRoleStatus :data="data" />
     </InfoItem>
     <InfoItem :label="t('容量使用率')"> -- </InfoItem>
-    <InfoItem :label="t('模块')">
-      {{ data.db_module_name || '--' }}
-    </InfoItem>
     <InfoItem :label="t('版本')">
       {{ data.major_version || '--' }}
     </InfoItem>
@@ -57,9 +48,6 @@
       TendbhaModel,
       | 'id'
       | 'cluster_name'
-      | 'master_domain'
-      | 'slave_domain'
-      | 'db_module_name'
       | 'major_version'
       | 'disasterToleranceLevelName'
       | 'region'

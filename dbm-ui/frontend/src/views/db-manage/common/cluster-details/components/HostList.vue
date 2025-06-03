@@ -139,10 +139,6 @@
   const handleSearchValueChange = (payload: any) => {
     dbTable.value?.fetchData(getSearchSelectorParams(payload));
   };
-
-  onMounted(() => {
-    dbTable.value?.fetchData();
-  });
 </script>
 <style lang="less">
   .cluster-detail-host-list-box {

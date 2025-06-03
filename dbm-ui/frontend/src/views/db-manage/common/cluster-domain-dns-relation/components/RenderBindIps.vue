@@ -10,8 +10,8 @@
       <AuthButton
         v-if="index === 0"
         action-id="access_entry_edit"
-        :permission="permission"
-        :resource="resource"
+        :permission="clusterData.permission.access_entry_edit"
+        :resource="clusterData.db_type"
         text
         theme="primary"
         @click="handleActiveInput">
@@ -49,15 +49,17 @@
   </div>
 </template>
 <script lang="ts">
-  import type { DBTypes } from '@common/const';
-
   import type { ClusterEntryInfo } from './Index.vue';
 
   interface Props {
+    clusterData: {
+      db_type: string;
+      id: number;
+      permission: {
+        access_entry_edit: boolean;
+      };
+    };
     data: ClusterEntryInfo;
-    id: number;
-    permission: boolean;
-    resource: DBTypes;
   }
 
   type Emits = (e: 'success') => void;
@@ -129,7 +131,7 @@
           target_instances: localValue.value.split('\n').map((row) => `${row}#${props.data.port}`),
         },
       ],
-      cluster_id: props.id,
+      cluster_id: props.clusterData.id,
     };
     runUpdateClusterEntryConfig(params);
   };

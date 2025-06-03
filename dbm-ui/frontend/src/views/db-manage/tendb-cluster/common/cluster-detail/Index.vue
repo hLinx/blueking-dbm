@@ -16,7 +16,9 @@
     v-bkloading="{ loading: isLoading }"
     class="cluster-detail-dialog-mode">
     <template v-if="data">
-      <DisplayBox :data="data">
+      <DisplayBox
+        cluster-detail-router-name="tendbClusterDetail"
+        :data="data">
         <BkButton
           v-db-console="'mysql.haClusterList.authorize'"
           class="ml-8"
@@ -25,17 +27,22 @@
           @click="handleShowAuthorize">
           {{ t('授权') }}
         </BkButton>
-        <AuthButton
+        <AuthRouterLink
           v-db-console="'tendbCluster.clusterManage.webconsole'"
           action-id="tendbcluster_webconsole"
           class="ml-8"
           :disabled="data.isOffline"
           :permission="data.permission.tendbcluster_webconsole"
           :resource="data.id"
-          size="small"
-          @click="handleGoWebconsole">
-          Webconsole
-        </AuthButton>
+          target="_blank"
+          :to="{
+            name: 'tendbClusterDetail',
+            query: {
+              clusterId: props.clusterId,
+            },
+          }">
+          <BkButton size="small">Webconsole</BkButton>
+        </AuthRouterLink>
         <BkButton
           v-db-console="'tendbCluster.clusterManage.exportData'"
           action-id="tendbcluster_dump_data"
@@ -47,21 +54,6 @@
           @click="handleShowDataExportSlider">
           {{ t('导出数据') }}
         </BkButton>
-        <BkDropdown placement="bottom-start">
-          <BkButton
-            v-bk-tooltips="t('复制')"
-            class="ml-8"
-            size="small"
-            style="padding: 0 6px">
-            <DbIcon type="copy-2" />
-          </BkButton>
-          <template #content>
-            <BkDropdownItem @click="handleCopyClusterMasterDomainAndLink">
-              {{ t('集群域名 + 集群链接') }}
-            </BkDropdownItem>
-            <BkDropdownItem @click="handleCopyLink">{{ t('集群链接') }}</BkDropdownItem>
-          </template>
-        </BkDropdown>
         <MoreActionExtend trigger="hover">
           <template #handler>
             <BkButton
@@ -84,7 +76,7 @@
               :permission="data.permission.tendbcluster_spider_mnt_destroy"
               :resource="data.id"
               text
-              @click="handleRemoveMNT(data)">
+              @click="handleRemoveMNT">
               {{ t('下架运维节点') }}
             </AuthButton>
           </BkDropdownItem>
@@ -151,22 +143,14 @@
               </AuthButton>
             </OperationBtnStatusTips>
           </BkDropdownItem>
+          <BkDropdownItem>
+            <ClusterDomainDnsRelation :data="data">
+              <BkButton text>
+                {{ t('手动配置域名 DNS 记录') }}
+              </BkButton>
+            </ClusterDomainDnsRelation>
+          </BkDropdownItem>
         </MoreActionExtend>
-        <RouterLink
-          v-if="!isDetailPage"
-          style="margin-left: auto"
-          target="_blank"
-          :to="{
-            name: 'tendbClusterDetail',
-            params: {
-              clusterId,
-            },
-          }">
-          <DbIcon
-            class="mr-4"
-            type="link" />
-          {{ t('新窗口打开') }}
-        </RouterLink>
       </DisplayBox>
       <ActionPanel
         :cluster-data="data"
@@ -189,26 +173,30 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="tsx">
+  import { Checkbox } from 'bkui-vue';
+  import InfoBox from 'bkui-vue/lib/info-box';
   import { useI18n } from 'vue-i18n';
   import { useRequest } from 'vue-request';
-  import { useRoute, useRouter } from 'vue-router';
 
   import TendbClusterModel from '@services/model/tendbcluster/tendbcluster';
-  import { getTendbclusterDetail } from '@services/source/tendbcluster';
+  import { getTendbclusterDetail, getTendbclusterPrimary } from '@services/source/tendbcluster';
+  import { createTicket } from '@services/source/ticket';
+
+  import { useTicketMessage } from '@hooks';
 
   import { AccountTypes, ClusterTypes, TicketTypes } from '@common/const';
 
   import MoreActionExtend from '@components/more-action-extend/Index.vue';
 
   import ClusterAuthorize from '@views/db-manage/common/cluster-authorize/Index.vue';
-  import ActionPanel from '@views/db-manage/common/cluster-details/ActionPanel.vue';
-  import DisplayBox from '@views/db-manage/common/cluster-details/DisplayBox.vue';
+  import { ActionPanel, DisplayBox } from '@views/db-manage/common/cluster-details';
+  import ClusterDomainDnsRelation from '@views/db-manage/common/cluster-domain-dns-relation/Index.vue';
   import ClusterExportData from '@views/db-manage/common/cluster-export-data/Index.vue';
   import { useOperateClusterBasic } from '@views/db-manage/common/hooks';
   import OperationBtnStatusTips from '@views/db-manage/common/OperationBtnStatusTips.vue';
 
-  import { execCopy, getSelfDomain } from '@utils';
+  import { messageWarn } from '@utils';
 
   import BaseInfo from './components/BaseInfo.vue';
 
@@ -222,23 +210,23 @@
   const emits = defineEmits<Emits>();
 
   const { t } = useI18n();
-  const route = useRoute();
-  const router = useRouter();
-
-  const isDetailPage = 'tendbClusterDetail' === route.name;
+  const ticketMessage = useTicketMessage();
 
   const data = ref<TendbClusterModel>();
-
-  /** 集群授权 */
   const isAuthorizeShow = ref(false);
   const isShowDataExport = ref(false);
-  const isShowCreateSubscribeRule = ref(false);
+  const removeMNTInstanceIds = ref<number[]>([]);
+  const clusterPrimaryMap = shallowRef<Record<string, boolean>>({});
 
   const clusterRoleNodeGroup = computed(() => {
     /* eslint-disable perfectionist/sort-objects */
     return {
-      'Spider Master': data.value?.spider_master || [],
+      'Spider Master': (data.value?.spider_master || []).map((item) => ({
+        ...item,
+        isPrimary: clusterPrimaryMap.value[item.ip],
+      })),
       'Spider Slave': data.value?.spider_slave || [],
+      [t('运维节点')]: data.value?.spider_mnt || [],
       RemoteDB: (data.value?.remote_db || []).map((item) => ({
         ...item,
         displayInstance: `${item.instance}(%_${item.shard_id})`,
@@ -270,6 +258,27 @@
     },
   );
 
+  useRequest(getTendbclusterPrimary, {
+    defaultParams: [
+      {
+        cluster_ids: [props.clusterId],
+      },
+    ],
+    onSuccess(data) {
+      if (data.length > 0) {
+        clusterPrimaryMap.value = data.reduce<Record<string, boolean>>((acc, cur) => {
+          const ip = cur.primary.split(':')[0];
+          if (ip) {
+            Object.assign(acc, {
+              [ip]: true,
+            });
+          }
+          return acc;
+        }, {});
+      }
+    },
+  });
+
   watch(
     () => props.clusterId,
     () => {
@@ -289,46 +298,94 @@
     isAuthorizeShow.value = true;
   };
 
-  const handleGoWebconsole = () => {
-    const { href } = router.resolve({
-      name: 'tendbClusterDetail',
-      query: {
-        clusterId: props.clusterId,
-      },
-    });
-    window.open(href);
-  };
-
   const handleShowDataExportSlider = () => {
     isShowDataExport.value = true;
   };
 
-  const handleDestroySlave = () => {
-    console.log('handleDestroySlave');
-  };
-  const handleRemoveMNT = () => {
-    isShowCreateSubscribeRule.value = true;
-  };
-
-  const handleCopyClusterMasterDomainAndLink = () => {
-    const { href } = router.resolve({
-      name: 'tendbClusterDetail',
-      params: {
-        clusterId: props.clusterId,
-      },
+  // 下架只读集群
+  const handleDestroySlave = (data: TendbClusterModel) => {
+    InfoBox({
+      content: t('下架后将无法访问只读集群'),
+      onConfirm: () =>
+        createTicket({
+          bk_biz_id: window.PROJECT_CONFIG.BIZ_ID,
+          details: {
+            cluster_ids: [data.id],
+            is_safe: true,
+          },
+          ticket_type: TicketTypes.TENDBCLUSTER_SPIDER_SLAVE_DESTROY,
+        }).then((res) => {
+          ticketMessage(res.id);
+        }),
+      title: t('确认下架只读集群'),
+      type: 'warning',
     });
-
-    execCopy(`${data.value?.master_domain}\n${getSelfDomain()}${href}`);
   };
 
-  const handleCopyLink = () => {
-    const { href } = router.resolve({
-      name: 'tendbClusterDetail',
-      params: {
-        clusterId: props.clusterId,
+  // 下架运维节点
+  const handleRemoveMNT = (data: TendbClusterModel) => {
+    InfoBox({
+      cancelText: t('取消'),
+      confirmText: t('下架'),
+      content: () => (
+        <div>
+          <p>{t('下架后将无法再访问_请谨慎操作')}</p>
+          <div style='text-align: left; padding: 0 24px;'>
+            <p
+              class='pt-12'
+              style='font-size: 12px;'>
+              {t('请勾选要下架的运维节点')}
+            </p>
+            <Checkbox.Group
+              v-model={removeMNTInstanceIds.value}
+              class='mnt-checkbox-group'
+              style='flex-wrap: wrap;'>
+              {data.spider_mnt.map((item) => (
+                <Checkbox label={item.bk_instance_id}>{item.instance}</Checkbox>
+              ))}
+            </Checkbox.Group>
+          </div>
+        </div>
+      ),
+      onCancel: () => {
+        removeMNTInstanceIds.value = [];
       },
+      onConfirm: () => {
+        if (removeMNTInstanceIds.value.length === 0) {
+          messageWarn(t('请勾选要下架的运维节点'));
+          return false;
+        }
+        return createTicket({
+          bk_biz_id: window.PROJECT_CONFIG.BIZ_ID,
+          details: {
+            infos: [
+              {
+                cluster_id: data.id,
+                old_nodes: {
+                  spider_ip_list: data.spider_mnt
+                    .filter((item) => removeMNTInstanceIds.value.includes(item.bk_instance_id))
+                    .map((item) => ({
+                      bk_cloud_id: item.bk_cloud_id,
+                      bk_host_id: item.bk_host_id,
+                      ip: item.ip,
+                    })),
+                },
+              },
+            ],
+            is_safe: true,
+          },
+          ticket_type: TicketTypes.TENDBCLUSTER_SPIDER_MNT_DESTROY,
+        })
+          .then((res) => {
+            ticketMessage(res.id);
+            removeMNTInstanceIds.value = [];
+            return true;
+          })
+          .catch(() => false);
+      },
+      title: t('确认下架运维节点'),
+      width: 480,
     });
-    execCopy(`${getSelfDomain()}${href}`);
   };
 </script>
 

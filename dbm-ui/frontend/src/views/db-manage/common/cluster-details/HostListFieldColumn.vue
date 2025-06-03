@@ -48,14 +48,14 @@
     field="host_info.bk_cpu_architecture"
     :label="t('CPU_核_')">
     <template #default="{ data }: { data: IData }">
-      {{ data.host_info.bk_cpu_architecture || '--' }}
+      {{ data.host_info.bk_cpu || '--' }}
     </template>
   </BkTableColumn>
   <BkTableColumn
     field="host_info.bk_mem"
-    :label="t('内存M')">
+    :label="t('内存G')">
     <template #default="{ data }: { data: IData }">
-      {{ data.host_info.bk_mem || '--' }}
+      {{ transformMToG(data.host_info.bk_mem) }}
     </template>
   </BkTableColumn>
   <BkTableColumn
@@ -77,4 +77,8 @@
   type IData = ServiceReturnType<ReturnType<typeof useClusterMachineList>>['results'][number];
 
   const { t } = useI18n();
+
+  const transformMToG = (value: number) => {
+    return value ? (value / 1024).toFixed(2) : '--';
+  };
 </script>

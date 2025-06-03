@@ -16,7 +16,9 @@
     v-bkloading="{ loading: isLoading }"
     class="cluster-detail-dialog-mode">
     <template v-if="data">
-      <DisplayBox :data="data">
+      <DisplayBox
+        cluster-detail-router-name="tendbHaDetail"
+        :data="data">
         <BkButton
           v-db-console="'mysql.haClusterList.authorize'"
           class="ml-8"
@@ -25,38 +27,28 @@
           @click="handleShowAuthorize">
           {{ t('授权') }}
         </BkButton>
-        <AuthButton
+        <AuthRouterLink
           v-db-console="'mysql.haClusterList.webconsole'"
           action-id="mysql_webconsole"
           class="ml-8"
           :disabled="data.isOffline"
           :permission="data.permission.mysql_webconsole"
           :resource="data.id"
-          size="small"
-          @click="handleGoWebconsole">
-          Webconsole
-        </AuthButton>
+          target="_blank"
+          :to="{
+            name: 'MySQLWebconsole',
+            query: {
+              clusterId: props.clusterId,
+            },
+          }">
+          <BkButton size="small">Webconsole</BkButton>
+        </AuthRouterLink>
         <BkButton
           class="ml-8"
           size="small"
           @click="handleShowDataExportSlider">
           {{ t('导出数据') }}
         </BkButton>
-        <BkDropdown placement="bottom-start">
-          <BkButton
-            v-bk-tooltips="t('复制')"
-            class="ml-8"
-            size="small"
-            style="padding: 0 6px">
-            <DbIcon type="copy-2" />
-          </BkButton>
-          <template #content>
-            <BkDropdownItem @click="handleCopyClusterMasterDomainAndLink">
-              {{ t('集群域名 + 集群链接') }}
-            </BkDropdownItem>
-            <BkDropdownItem @click="handleCopyLink">{{ t('集群链接') }}</BkDropdownItem>
-          </template>
-        </BkDropdown>
         <MoreActionExtend trigger="hover">
           <template #handler>
             <BkButton
@@ -127,22 +119,14 @@
               </AuthButton>
             </OperationBtnStatusTips>
           </BkDropdownItem>
+          <BkDropdownItem>
+            <ClusterDomainDnsRelation :data="data">
+              <BkButton text>
+                {{ t('手动配置域名 DNS 记录') }}
+              </BkButton>
+            </ClusterDomainDnsRelation>
+          </BkDropdownItem>
         </MoreActionExtend>
-        <RouterLink
-          v-if="!isDetailPage"
-          style="margin-left: auto"
-          target="_blank"
-          :to="{
-            name: 'tendbHaDetail',
-            params: {
-              clusterId,
-            },
-          }">
-          <DbIcon
-            class="mr-4"
-            type="link" />
-          {{ t('新窗口打开') }}
-        </RouterLink>
       </DisplayBox>
       <ActionPanel
         :cluster-data="data"
@@ -172,7 +156,6 @@
 <script setup lang="ts">
   import { useI18n } from 'vue-i18n';
   import { useRequest } from 'vue-request';
-  import { useRoute, useRouter } from 'vue-router';
 
   import type { MySQLFunctions } from '@services/model/function-controller/functionController';
   import TendbhaModel from '@services/model/mysql/tendbha';
@@ -185,14 +168,12 @@
   import MoreActionExtend from '@components/more-action-extend/Index.vue';
 
   import ClusterAuthorize from '@views/db-manage/common/cluster-authorize/Index.vue';
-  import ActionPanel from '@views/db-manage/common/cluster-details/ActionPanel.vue';
-  import DisplayBox from '@views/db-manage/common/cluster-details/DisplayBox.vue';
+  import { ActionPanel, DisplayBox } from '@views/db-manage/common/cluster-details';
+  import ClusterDomainDnsRelation from '@views/db-manage/common/cluster-domain-dns-relation/Index.vue';
   import ClusterExportData from '@views/db-manage/common/cluster-export-data/Index.vue';
   import { useOperateClusterBasic } from '@views/db-manage/common/hooks';
   import OperationBtnStatusTips from '@views/db-manage/common/OperationBtnStatusTips.vue';
   import CreateSubscribeRuleSlider from '@views/db-manage/mysql/dumper/components/create-rule/Index.vue';
-
-  import { execCopy, getSelfDomain } from '@utils';
 
   import BaseInfo from './components/BaseInfo.vue';
 
@@ -206,11 +187,7 @@
   const emits = defineEmits<Emits>();
 
   const { t } = useI18n();
-  const route = useRoute();
-  const router = useRouter();
   const funControllerStore = useFunController();
-
-  const isDetailPage = 'tendbHaDetail' === (route.name as string);
 
   const data = ref<TendbhaModel>();
 
@@ -224,7 +201,10 @@
     return {
       Proxy: data.value?.proxies || [],
       Master: data.value?.masters || [],
-      Slave: data.value?.slaves || [],
+      Slave: (data.value?.slaves || []).map((item) => ({
+        ...item,
+        isStandBy: item.is_stand_by,
+      })),
     };
     /* eslint-enable perfectionist/sort-objects */
   });
@@ -236,7 +216,7 @@
 
   const { loading: isLoading, run: fetchClusterDetail } = useRequest(getTendbhaDetail, {
     manual: true,
-    onSuccess(result: TendbhaModel) {
+    onSuccess(result) {
       data.value = result;
     },
   });
@@ -272,43 +252,12 @@
     isAuthorizeShow.value = true;
   };
 
-  const handleGoWebconsole = () => {
-    const { href } = router.resolve({
-      name: 'MySQLWebconsole',
-      query: {
-        clusterId: props.clusterId,
-      },
-    });
-    window.open(href);
-  };
-
   const handleShowDataExportSlider = () => {
     isShowDataExport.value = true;
   };
 
   const handleShowCreateSubscribeRuleSlider = () => {
     isShowCreateSubscribeRule.value = true;
-  };
-
-  const handleCopyClusterMasterDomainAndLink = () => {
-    const { href } = router.resolve({
-      name: 'tendbHaDetail',
-      params: {
-        clusterId: props.clusterId,
-      },
-    });
-
-    execCopy(`${data.value?.master_domain}\n${getSelfDomain()}${href}`);
-  };
-
-  const handleCopyLink = () => {
-    const { href } = router.resolve({
-      name: 'tendbHaDetail',
-      params: {
-        clusterId: props.clusterId,
-      },
-    });
-    execCopy(`${getSelfDomain()}${href}`);
   };
 </script>
 

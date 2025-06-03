@@ -6,7 +6,9 @@
       'is-active': isShowPopMenu,
     }">
     <DbIcon type="more" />
-    <div ref="popMenu">
+    <div
+      ref="popMenu"
+      class="wrapper">
       <slot
         v-if="isShowPopMenu"
         name="default" />
@@ -103,6 +105,22 @@
       padding: 8px 0;
     }
 
+    .wrapper {
+      display: flex;
+      flex-direction: column;
+
+      & > * {
+        &:hover {
+          background-color: #f5f7fa;
+
+          a,
+          .bk-button {
+            color: #3a84ff;
+          }
+        }
+      }
+    }
+
     a,
     .bk-button {
       display: block;
@@ -112,15 +130,16 @@
       line-height: 32px;
       color: #63656e;
       text-align: left;
+    }
 
-      &:hover {
-        color: #3a84ff;
-        background-color: #f5f7fa;
+    .bk-button {
+      &.is-disabled {
+        color: #dcdee5 !important;
       }
     }
 
-    a {
-      font-size: 12px;
+    a[disabled='true'] {
+      color: #dcdee5 !important;
     }
   }
 </style>

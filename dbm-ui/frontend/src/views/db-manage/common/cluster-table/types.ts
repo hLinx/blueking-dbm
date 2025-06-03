@@ -31,7 +31,7 @@ export type ISupportClusterType =
   | ClusterTypes.MONGO_REPLICA_SET
   | ClusterTypes.MONGO_SHARED_CLUSTER;
 
-interface ClusterTypeRelateClusterModel {
+export interface ClusterTypeRelateClusterModel {
   [ClusterTypes.DORIS]: DorisModel;
   [ClusterTypes.ES]: EsModel;
   [ClusterTypes.HDFS]: HdfsModel;
