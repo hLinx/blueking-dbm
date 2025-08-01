@@ -127,6 +127,7 @@
         ticket_ids: `${props.ticketId}`,
       }),
     {
+      manual: true,
       onSuccess(data) {
         if (!data[`${props.ticketId}`]) {
           return;
