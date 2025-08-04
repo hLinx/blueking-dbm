@@ -71,7 +71,6 @@
   import TodoList from '../todo-list/Index.vue';
 
   import Abstract from './components/abstract/Index.vue';
-  import FlowCollapse from './components/FlowCollapse.vue';
 
   interface Props {
     data: FlowMode<unknown, any>;
