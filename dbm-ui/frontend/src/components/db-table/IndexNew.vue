@@ -22,11 +22,13 @@
         :key="tableKey"
         ref="bkTableRef"
         v-bind="{
-          ...props,
+          ...inhertProps,
           data: tableData.results,
           maxHeight: tableMaxHeight,
           showHeader: true,
+          filterRow: null as any,
         }"
+        @change="handleFilterChange"
         @row-click="handleRowClick"
         @sort-change="handleSortChange">
         <component
@@ -55,7 +57,14 @@
 </template>
 <script setup lang="tsx">
   import _ from 'lodash';
-  import { type TableProps, type TableSort } from 'tdesign-vue-next';
+  import {
+    type SortOptions,
+    type TableChangeContext,
+    type TableChangeData,
+    type TableProps,
+    type TableRowData,
+    type TableSort,
+  } from 'tdesign-vue-next';
   import { nextTick, onMounted, type Ref, ref, type VNode } from 'vue';
   import { useRouter } from 'vue-router';
 
@@ -94,6 +103,8 @@
     (e: 'requestFinished', value: any[]): void;
     (e: 'clearSearch'): void;
     (e: 'selection', key: string[], list: any[]): void;
+    (e: 'change', data: TableChangeData, context: TableChangeContext<TableRowData>): void;
+    (e: 'sortChange', sort: TableSort, options: SortOptions<TableRowData>): void;
   }
 
   export interface Slots {
@@ -122,11 +133,32 @@
     selectable: false,
     selected: () => [],
     settings: undefined,
-    sortType: 'default',
   });
 
   const emits = defineEmits<Emits>();
+
   defineSlots<Slots>();
+
+  const inhertProps = computed(() => {
+    const baseProps = { ...props };
+    delete baseProps['containerHeight'];
+    // @ts-expect-error 删除不存在的 props
+    delete baseProps['disableSelectMethod'];
+    // @ts-expect-error 删除不存在的 props
+    delete baseProps['fixedPagination'];
+    // @ts-expect-error 删除不存在的 props
+    delete baseProps['releateUrlQuery'];
+    // @ts-expect-error 删除不存在的 props
+    delete baseProps['rowClickSelectable'];
+    // @ts-expect-error 删除不存在的 props
+    delete baseProps['selectable'];
+    // @ts-expect-error 删除不存在的 props
+    delete baseProps['settings'];
+    delete baseProps['onChange'];
+    // @ts-expect-error 删除不存在的 props
+    delete baseProps['dataSource'];
+    return baseProps;
+  });
 
   const router = useRouter();
 
@@ -322,6 +354,9 @@
 
     fetchListData();
   };
+  const handleFilterChange = (data: TableChangeData, context: TableChangeContext<TableRowData>) => {
+    emits('change', data, context);
+  };
 
   // 情况搜索条件
   const handleClearSearch = () => {
@@ -336,8 +371,9 @@
       const top = props.containerHeight ? 0 : getOffset(rootRef.value).top;
       const totalHeight = props.containerHeight ? props.containerHeight : window.innerHeight;
       const pageOffsetBottom = props.containerHeight ? 0 : 20;
+      const paginationHeight = 60;
 
-      const tableRowTotalHeight = totalHeight - top - pageOffsetBottom;
+      const tableRowTotalHeight = totalHeight - top - pageOffsetBottom - paginationHeight;
 
       tableMaxHeight.value = tableRowTotalHeight;
     });
