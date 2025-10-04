@@ -41,8 +41,6 @@
     required: true,
   });
 
-  const OVERFLOW_MIN_COUNT = 3;
-
   const currentInstance = getCurrentInstance();
 
   const rootRef = useTemplateRef('root');
