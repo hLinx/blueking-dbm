@@ -77,7 +77,6 @@ const replicaSetListRouters: RouteRecordRaw[] = [
     path: 'replica-set',
     name: 'MongoDBReplicaSet',
     meta: {
-      fullscreen: true,
       navName: t('【MongoDB】副本集集群管理'),
     },
     redirect: {
@@ -89,7 +88,6 @@ const replicaSetListRouters: RouteRecordRaw[] = [
         path: 'list/:clusterId?',
         name: 'MongoDBReplicaSetList',
         meta: {
-          fullscreen: true,
           navName: t('【MongoDB】副本集集群管理'),
         },
         component: () => import('@views/db-manage/mongodb/replica-set-list/Index.vue'),
@@ -124,7 +122,6 @@ const sharedClusterListRouters: RouteRecordRaw[] = [
     path: 'shared-cluster',
     name: 'MongoDBSharedCluster',
     meta: {
-      fullscreen: true,
       navName: t('【MongoDB】分片集群管理'),
     },
     redirect: {
@@ -136,7 +133,6 @@ const sharedClusterListRouters: RouteRecordRaw[] = [
         path: 'list/:clusterId?',
         name: 'MongoDBSharedClusterList',
         meta: {
-          fullscreen: true,
           navName: t('【MongoDB】分片集群管理'),
         },
         component: () => import('@views/db-manage/mongodb/shared-cluster-list/Index.vue'),

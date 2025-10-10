@@ -1,7 +1,8 @@
 <template>
   <TableColumn
     class-name="cluster-table-cluster-name-column"
-    col-key="cluster_name"
+    col-key="name"
+    :filter="columnFilter?.['name']"
     :min-width="200"
     :title="t('集群名称')">
     <template #title>
@@ -64,7 +65,8 @@
 
   import TendnclusterModel from '@services/model/tendbcluster/tendbcluster';
 
-  import DbTable from '@components/db-table/index.vue';
+  import { useClusterColumnFilter } from '@hooks';
+
   import TextOverflowLayout from '@components/text-overflow-layout/Index.vue';
 
   import RenderHeadCopy from '@views/db-manage/common/render-head-copy/Index.vue';
@@ -72,13 +74,13 @@
   import { execCopy } from '@utils';
 
   import useColumnCopy from './hooks/useColumnCopy';
+  import type { Expose as ClusterTableExpose } from './Index.vue';
   import type { ClusterModel, ISupportClusterType } from './types';
 
   export interface Props<clusterType extends ISupportClusterType> {
-    // eslint-disable-next-line vue/no-unused-properties
     clusterType: clusterType;
     // eslint-disable-next-line vue/no-unused-properties
-    getTableInstance: () => InstanceType<typeof DbTable> | undefined;
+    getTableInstance: () => ClusterTableExpose | null;
     isFilter: boolean;
     selectedList: ClusterModel<clusterType>[];
   }
@@ -91,6 +93,9 @@
   const isToolsShow = ref(false);
 
   const { handleCopyAll, handleCopySelected } = useColumnCopy(props);
+  const { data: columnFilter } = useClusterColumnFilter({
+    cluster_type: props.clusterType,
+  });
 
   const handleToolsShow = () => {
     setTimeout(() => {
