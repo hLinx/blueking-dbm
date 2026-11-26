@@ -1,12 +1,13 @@
 ---
 name: create-pr
-description: 把当前分支从个人 fork 向上游 TencentBlueKing/blueking-dbm 创建 Pull Request
-disable-model-invocation: true
+description: >-
+  把当前分支从个人 fork 向上游 TencentBlueKing/blueking-dbm 创建 Pull Request。
+  当用户要求创建、提交或发起 PR / Pull Request，或输入 /create-pr 时使用。
 ---
 
 # 创建 Pull Request
 
-**Input**：`/create-pr` 之后可选传入目标分支与 issue 编号，顺序不限。
+**Input**：通过 `/create-pr` 或自然语言提出创建 PR 时，可选传入目标分支与 issue 编号，顺序不限。
 
 - 形如 `#12345` 或纯数字的入参为 issue 编号，未传入时从提交标题末尾的 `#\d+` 提取。
 - 其余入参为目标分支（如 `frontend_dev`、`frontend_master`、`v1.5.0`），未传入时用 **AskQuestion tool**
